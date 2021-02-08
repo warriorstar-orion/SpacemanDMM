@@ -19,10 +19,14 @@ serde_derive = "1.0.103"
 toml = "0.5.5"
 guard = "0.5.0"
 phf = { version = "0.8.0", features = ["macros"] }
+protobuf = "2"
 
 [dependencies.linked-hash-map]
 git = "https://github.com/SpaceManiac/linked-hash-map"
 branch = "get-key-value"
+
+[build-dependencies]
+protobuf-codegen-pure = "2"
 
 [dev-dependencies]
 walkdir = "2.0.1"

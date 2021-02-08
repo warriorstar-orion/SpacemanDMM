@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "src/cli",
+    "src/dm2pb",
     "src/dmdoc",
     "src/dreamchecker",
     "src/dreammaker",

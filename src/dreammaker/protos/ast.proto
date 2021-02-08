@@ -1,0 +1,541 @@
+syntax = "proto2";
+
+package ast;
+
+message Pop {
+  optional TreePath tree_path = 1;
+  map<string, Constant> vars = 2;
+}
+
+enum ConstFn {
+  CONST_FN_ICON = 0;
+  CONST_FN_MATRIX = 1;
+  CONST_FN_NEWLIST = 2;
+  CONST_FN_SOUND = 3;
+  CONST_FN_FILTER = 4;
+  CONST_FN_FILE = 5;
+}
+
+message Args {
+  optional Constant first = 1;
+  optional Constant second = 2;
+}
+
+message ConstantNew {
+  optional Pop pop_type = 1;
+  repeated Args args = 2;
+}
+
+message ConstantList { repeated Args args = 1; }
+
+message ConstantCall {
+  optional ConstFn const_fn = 1;
+  optional Args args = 2;
+}
+
+message ConstantPrefab { optional Pop pop = 1; }
+
+message Constant {
+  optional TreePath null = 1;
+  optional ConstantNew new = 2;
+  optional ConstantList list = 3;
+  optional ConstantCall call = 4;
+  optional ConstantPrefab prefab = 5;
+  optional string string_constant = 6;
+  optional string resource = 7;
+  optional int32 int = 8;
+  optional float float = 9;
+}
+
+message TreePath { repeated string s = 1; }
+
+message VarType {
+  optional bool is_static = 1;
+  optional bool is_const = 2;
+  optional bool is_tmp = 3;
+  optional bool is_final = 4;
+  optional bool is_private = 5;
+  optional bool is_protected = 6;
+  optional TreePath type_path = 7;
+}
+
+message SymbolId { optional int32 symbol_id = 1; }
+
+message Location {
+  optional FileId file = 1;
+  optional int32 line = 2;
+  optional int32 column = 3;
+}
+
+message FileId { optional int32 file_id = 1; }
+
+message VarValue {
+  optional Location location = 1;
+  optional Expression expression = 2;
+  optional Constant constant = 3;
+  optional bool being_evaluated = 4;
+  optional DocCollection docs = 5;
+}
+
+message VarDeclaration {
+  optional VarType var_type = 1;
+  optional Location location = 2;
+  optional SymbolId id = 3;
+}
+
+message TypeVar {
+  optional VarValue value = 1;
+  optional VarDeclaration declaration = 2;
+}
+
+message Type {
+  optional string name = 1;
+  optional string path = 2;
+  optional Location location = 3;
+  optional int64 location_specificity = 4;
+  map<string, TypeVar> vars = 5;
+  map<string, TypeProc> procs = 6;
+  optional int64 parent_type = 7;
+  optional DocCollection docs = 8;
+  optional SymbolId symbol_id = 9;
+}
+
+message Parameter {
+  optional VarType var_type = 1;
+  optional string name = 2;
+  optional Expression default = 3;
+  optional InputType input_type = 4;
+  optional Expression in_list = 5;
+  optional Location location = 6;
+}
+
+enum CommentKind {
+  COMMENT_KIND_BLOCK = 0;
+  COMMENT_KIND_LINE = 1;
+}
+
+enum DocTarget {
+  DOC_TARGET_FOLLOWING_ITEM = 1;
+  DOC_TARGET_ENCLOSING_ITEM = 2;
+}
+
+message ProcDeclaration {
+  optional Location location = 1;
+  optional ProcDeclKind kind = 2;
+  optional SymbolId id = 3;
+  optional bool is_private = 4;
+  optional bool is_protected = 5;
+}
+
+message TypeProc {
+  repeated ProcValue value = 1;
+  optional ProcDeclaration declaration = 2;
+}
+
+message DocCollection {
+  repeated DocComment elems = 1;
+}
+
+message DocComment {
+  optional CommentKind kind = 1;
+  optional DocTarget target = 2;
+  optional string text = 3;
+}
+
+message ProcValue {
+  optional Location location = 1;
+  repeated Parameter parameter = 2;
+  optional DocCollection docs = 3;
+  optional Code code = 4;
+}
+
+message Block {
+  repeated Statement statement = 1;
+}
+
+message Code {
+  optional Block present = 1;
+  optional bool invalid = 2;
+  optional bool builtin = 3;
+  optional bool disabled = 4;
+}
+
+message VarTypeCollection { repeated VarType var_type = 1; }
+
+message Graph { repeated Type type = 1; }
+
+message While {
+  optional Expression condition = 1;
+  optional Block block = 2;
+}
+
+message DoWhile {
+  optional Expression condition = 1;
+  optional Block block = 2;
+}
+
+message IfArm {
+  optional Expression expr = 1;
+  optional Block block = 2;
+}
+
+message If {
+  repeated IfArm arm = 1;
+  optional Block else_arm = 2;
+}
+
+message ForLoop {
+  optional Statement init = 1;
+  optional Expression test = 2;
+  optional Statement inc = 3;
+  optional Block block = 4;
+}
+
+message ForList {
+  optional VarType var_type = 1;
+  optional string name = 2;
+  optional InputType input_type = 3;
+  optional Expression in_list = 4;
+  optional Block block = 5;
+}
+
+message ForRange {
+  optional VarType var_type = 1;
+  optional string name = 2;
+  optional Expression start = 3;
+  optional Expression end = 4;
+  optional Expression step = 5;
+  optional Block block = 6;
+}
+
+message VarStatement {
+  optional VarType var_type = 1;
+  optional string name = 2;
+  optional Expression value = 3;
+}
+
+enum SettingMode { SETTING_MODE_ASSIGN = 0; SETTING_MODE_IN = 1; }
+
+enum ProcDeclKind { PROC_DECL_KIND_PROC = 0; PROC_DECL_KIND_VERB = 1; }
+
+message Setting {
+  optional string name = 1;
+  optional SettingMode mode = 2;
+  optional Expression value = 3;
+}
+
+message Spawn {
+  optional Expression delay = 1;
+  optional Block block = 2;
+}
+
+message SwitchCaseRange {
+  optional Expression start = 1;
+  optional Expression end = 2;
+}
+
+message SwitchCase {
+  optional Expression exact = 1;
+  optional SwitchCaseRange range = 2;
+}
+
+message SwitchCases {
+  repeated SwitchCase case = 1;
+  optional Block block = 2;
+}
+
+message Switch {
+  optional Expression input = 1;
+  repeated SwitchCases cases = 2;
+  optional Block default = 3;
+}
+
+message TryCatch {
+  optional Block try_block = 1;
+  repeated TreePath catch_params = 2;
+  optional Block catch_block = 3;
+}
+
+message Continue { optional string s = 1; }
+
+message Break { optional string s = 1; }
+
+message Goto { optional string s = 1; }
+
+message Label {
+  optional string name = 1;
+  optional Block block = 2;
+}
+
+message Del { optional Expression expr = 1; }
+
+message Crash { optional Expression expr = 2; }
+
+message StmtExpr {
+  optional Expression expr = 1;
+  optional bool is_set = 2;
+}
+
+message Statement {
+  optional StmtExpr expr = 1;
+  optional StmtExpr return_s = 2;
+  optional StmtExpr throw = 3;
+  optional While while_s = 4;
+  optional DoWhile do_while = 5;
+  optional If if_s = 6;
+  optional ForLoop for_loop = 7;
+  optional ForList for_list = 8;
+  optional ForRange for_range = 9;
+  optional VarStatement var = 10;
+  repeated VarStatement vars = 11;
+  optional Setting setting = 12;
+  optional Spawn spawn = 13;
+  optional Switch switch = 14;
+  optional TryCatch try_catch = 15;
+  optional Continue continue_s = 16;
+  optional Break break_s = 17;
+  optional Goto goto = 18;
+  optional Label label = 19;
+  optional Del del = 20;
+  optional Crash crash = 21;
+}
+
+enum PathOp {
+  PATHOP_SLASH = 0;
+  PATHOP_DOT = 1;
+  PATHOP_COLON = 2;
+}
+
+enum AssignOp {
+  ASSIGNOP_ASSIGN = 0;
+  ASSIGNOP_ADD_ASSIGN = 1;
+  ASSIGNOP_SUB_ASSIGN = 2;
+  ASSIGNOP_MUL_ASSIGN = 3;
+  ASSIGNOP_DIV_ASSIGN = 4;
+  ASSIGNOP_MOD_ASSIGN = 5;
+  ASSIGNOP_BIT_AND_ASSIGN = 6;
+  ASSIGNOP_BIT_OR_ASSIGN = 7;
+  ASSIGNOP_BIT_XOR_ASSIGN = 8;
+  ASSIGNOP_L_SHIFT_ASSIGN = 9;
+  ASSIGNOP_R_SHIFT_ASSIGN = 10;
+}
+
+enum UnaryOp {
+  UNARYOP_NEG = 0;
+  UNARYOP_NOT = 1;
+  UNARYOP_BIT_NOT = 2;
+  UNARYOP_PRE_INCR = 3;
+  UNARYOP_POST_INCR = 4;
+  UNARYOP_PRE_DECR = 5;
+  UNARYOP_POST_DECR = 6;
+}
+
+enum BinaryOp {
+  BINARYOP_ADD = 0;
+  BINARYOP_SUB = 1;
+  BINARYOP_MUL = 2;
+  BINARYOP_DIV = 3;
+  BINARYOP_POW = 4;
+  BINARYOP_MOD = 5;
+  BINARYOP_EQ = 6;
+  BINARYOP_NOTEQ = 7;
+  BINARYOP_LESS = 8;
+  BINARYOP_GREATER = 9;
+  BINARYOP_LESSEQ = 10;
+  BINARYOP_GREATEREQ = 11;
+  BINARYOP_EQUIV = 12;
+  BINARYOP_NOTEQUIV = 13;
+  BINARYOP_BITAND = 14;
+  BINARYOP_BITXOR = 15;
+  BINARYOP_BITOR = 16;
+  BINARYOP_LSHIFT = 17;
+  BINARYOP_RSHIFT = 18;
+  BINARYOP_AND = 19;
+  BINARYOP_OR = 20;
+  BINARYOP_IN = 21;
+  BINARYOP_TO = 22;
+}
+
+enum EnumValue {
+  INPUT_TYPE_MOB = 0;
+  INPUT_TYPE_OBJ = 1;
+  INPUT_TYPE_TEXT = 2;
+  INPUT_TYPE_NUM = 3;
+  INPUT_TYPE_FILE = 4;
+  INPUT_TYPE_TURF = 5;
+  INPUT_TYPE_KEY = 6;
+  INPUT_TYPE_NULL = 7;
+  INPUT_TYPE_AREA = 8;
+  INPUT_TYPE_ICON = 9;
+  INPUT_TYPE_SOUND = 10;
+  INPUT_TYPE_MESSAGE = 11;
+  INPUT_TYPE_ANYTHING = 12;
+  INPUT_TYPE_PASSWORD = 15;
+  INPUT_TYPE_COMMAND_TEXT = 16;
+  INPUT_TYPE_COLOR = 17;
+  INPUT_TYPE_ERROR_UNKNOWN = 18;
+}
+
+message InputType {
+  optional int32 val = 1;
+  optional string display = 2;
+  repeated EnumValue key_name = 3;
+}
+
+message TypePath {
+  optional PathOp path_op = 1;
+  optional string s = 2;
+}
+
+message BaseExpression {
+  repeated UnaryOp unary = 1;
+  optional Term term = 2;
+  repeated Follow follow = 3;
+}
+
+message Follow {
+  optional Expression index = 1;
+  optional Field field = 2;
+  optional FollowCall call = 3;
+}
+
+message FollowCall {
+  optional IndexKind index_kind = 1;
+  optional string s = 2;
+  repeated Expression expr = 3;
+}
+
+message Expression {
+  optional BaseExpression base = 1;
+  optional BinaryOpExpression binary_op = 2;
+  optional AssignOpExpression assign_op = 3;
+  optional TernaryOpExpression ternary_op = 4;
+}
+
+message BinaryOpExpression {
+  optional BinaryOp op = 1;
+  optional Expression lhs = 2;
+  optional Expression rhs = 3;
+}
+
+message AssignOpExpression {
+  optional AssignOp op = 1;
+  optional Expression lhs = 2;
+  optional Expression rhs = 3;
+}
+
+message TernaryOpExpression {
+  optional Expression cond_expr = 1;
+  optional Expression if_expr = 2;
+  optional Expression else_expr = 3;
+}
+
+message Prefab {
+  repeated TypePath path = 1;
+  map<string, Expression> vars = 2;
+}
+
+message InterpStringCollection {
+  optional Expression expr = 1;
+  optional string s = 2;
+}
+
+message InterpString {
+  optional string s = 1;
+  repeated InterpStringCollection collections = 2;
+}
+
+message TermCall {
+  optional string s = 1;
+  repeated Expression expr = 2;
+}
+
+message SelfCall { repeated Expression expr = 1; }
+
+message ParentCall { repeated Expression expr = 1; }
+
+enum IndexKind {
+  INDEX_KIND_DOT = 0; INDEX_KIND_COLON = 1; INDEX_KIND_SAFE_DOT = 2;
+  INDEX_KIND_SAFE_COLON = 3;
+}
+
+message Field {
+  optional IndexKind index_kind = 1;
+  optional string s = 2;
+}
+
+message IndexOrField {
+  optional Expression index = 1;
+  optional Field field = 2;
+}
+
+message MiniExpr {
+  optional string ident = 1;
+  repeated IndexOrField fields = 2;
+}
+
+message NewType {
+  optional bool implicit = 1;
+  optional Prefab prefab = 2;
+  optional MiniExpr mini_expr = 3;
+}
+
+message New {
+  optional NewType type = 1;
+  repeated Expression args = 2;
+}
+
+message Input {
+  repeated Expression args = 1;
+  optional InputType input_type = 2;
+  optional Expression in_list = 3;
+}
+
+message Locate {
+  repeated Expression args = 1;
+  optional Expression in_list = 2;
+}
+
+message PickPair {
+  optional Expression first = 1;
+  optional Expression second = 2;
+}
+
+message Pick { repeated PickPair pick = 1; }
+
+message DynamicCall {
+  repeated Expression first = 1;
+  repeated Expression second = 2;
+}
+
+message ListCall {
+  repeated Expression call = 1;
+  optional bool is_set = 2;
+}
+
+message Term {
+  // Terms with no recursive contents
+  optional bool null_t = 1;
+  optional int32 int_t = 2;
+  optional float float_t = 3;
+  optional string ident = 4;
+  optional string string_t = 5;
+  optional string resource = 6;
+  optional InputType as_t = 7;
+
+  // Non function calls with recursive contents
+  optional Expression expr = 8;
+  optional Prefab prefab = 9;
+  optional InterpString interp_string = 10;
+
+  // Function calls with recursive contents
+  optional TermCall call = 11;
+  optional SelfCall self_call = 12;
+  optional ParentCall parent_call = 13;
+  optional New new = 14;
+  optional ListCall list = 15;
+  optional Input input = 16;
+  optional Locate locate = 17;
+  optional Pick pick = 18;
+  optional DynamicCall dynamic_call = 19;
+}

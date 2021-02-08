@@ -335,10 +335,10 @@ pub fn register_builtins(tree: &mut ObjectTree) -> Result<(), DMError> {
             // these kwargs
             alpha, color, infra_luminosity, layer, maptext_width, maptext_height,
             maptext_x, maptext_y, luminosity, pixel_x, pixel_y, pixel_w, pixel_z,
-            transform, dir, icon, icon_state, invisibility, maptext, suffix, appearance,
+            transform, icon, icon_state, invisibility, maptext, suffix, appearance,
             dir, radius,
             // filters only
-            size, x, y, offset, flags);
+            size, x, y, offset);
         proc/arccos(X);
         proc/arcsin(X);
         proc/arglist(List);  // special form
@@ -530,7 +530,7 @@ pub fn register_builtins(tree: &mut ObjectTree) -> Result<(), DMError> {
         datum/var/const/type;  // not editable
         datum/var/const/parent_type;  // not editable
         datum/var/tag;
-        datum/var/const/list/vars;  // not editable
+        //datum/var/const/list/vars;  // not editable
         datum/proc/New();
         datum/proc/Del();
         datum/proc/Read(/*savefile*/F);
@@ -541,7 +541,7 @@ pub fn register_builtins(tree: &mut ObjectTree) -> Result<(), DMError> {
         list/var/const/type;
         list/var/const/parent_type;
         list/var/tag;
-        list/var/const/list/vars;
+        //list/var/const/list/vars;
         list/proc/Add(Item1, Item2/*,...*/);
         list/proc/Copy(Start=1, End=0);
         list/proc/Cut(Start=1, End=0);
@@ -662,7 +662,7 @@ pub fn register_builtins(tree: &mut ObjectTree) -> Result<(), DMError> {
         mob/proc/Logout();
 
         world;
-        world/var/const/list/vars;
+        //world/var/const/list/vars;
         world/proc/New();
         world/proc/Del();
         world/proc/Topic(T, Addr, Master, Keys);
@@ -730,7 +730,7 @@ pub fn register_builtins(tree: &mut ObjectTree) -> Result<(), DMError> {
         client/var/const/type;
         client/var/const/parent_type;
         client/var/tag;
-        client/var/const/list/vars;
+        //client/var/const/list/vars;
         client/proc/New();
         client/proc/Del();
         client/proc/Topic(href, href_list, hsrc);
@@ -936,13 +936,15 @@ pub fn register_builtins(tree: &mut ObjectTree) -> Result<(), DMError> {
         image/var/name;  // undocumented
         image/var/mouse_opacity;  // undocumented
         image/New(icon, loc, icon_state, layer, dir);
+
         mutable_appearance/parent_type = path!(/image);
+        mutable_appearance/var/opacity;  // inherited from /mob according to the docs
 
         savefile;
         savefile/var/const/type;
         savefile/var/const/parent_type;
         savefile/var/tag;
-        savefile/var/const/list/vars;
+        //savefile/var/const/list/vars;
         savefile/proc/New(filename, timeout);
         savefile/proc/Del();
         savefile/var/cd;

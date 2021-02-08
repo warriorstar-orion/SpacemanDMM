@@ -2,12 +2,26 @@
 
 use std::collections::BTreeMap;
 use std::fmt;
+use std::convert::TryInto;
 
 pub use petgraph::graph::NodeIndex;
 use petgraph::graph::Graph;
 use petgraph::visit::EdgeRef;
 use petgraph::Direction;
 use linked_hash_map::LinkedHashMap;
+
+use super::protos::ast::Block as BlockProto;
+use super::protos::ast::VarValue as VarValueProto;
+use super::protos::ast::TreePath as TreePathProto;
+use super::protos::ast::Graph as GraphProto;
+use super::protos::ast::Type as TypeProto;
+use super::protos::ast::TypeVar as TypeVarProto;
+use super::protos::ast::TypeProc as TypeProcProto;
+use super::protos::ast::ProcValue as ProcValueProto;
+use super::protos::ast::Code as CodeProto;
+use super::protos::ast::SymbolId as SymbolIdProto;
+use super::protos::ast::ProcDeclaration as ProcDeclarationProto;
+use super::protos::ast::VarDeclaration as VarDeclarationProto;
 
 use super::ast::{Expression, VarType, VarSuffix, PathOp, Parameter, Block, ProcDeclKind};
 use super::constants::{Constant, Pop};
@@ -20,6 +34,15 @@ use super::{DMError, Location, Context, Severity};
 /// An identifier referring to a symbol in the object tree.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct SymbolId(u32);
+
+impl SymbolId {
+  pub fn get_proto_representation(self) -> SymbolIdProto {
+    let mut symbol_id_pb = SymbolIdProto::new();
+    let SymbolId(i) = self;
+    symbol_id_pb.set_symbol_id(i.try_into().unwrap());
+    symbol_id_pb
+  }
+}
 
 #[derive(Debug)]
 pub struct SymbolIdSource(SymbolId);
@@ -57,6 +80,16 @@ pub struct VarDeclaration {
     pub id: SymbolId,
 }
 
+impl VarDeclaration {
+    pub fn get_proto_representation(&self) -> VarDeclarationProto {
+        let mut var_decl_pb = VarDeclarationProto::new();
+        var_decl_pb.set_var_type(self.var_type.get_proto_representation());
+        var_decl_pb.set_location(self.location.get_proto_representation());
+        var_decl_pb.set_id(self.id.get_proto_representation());
+        var_decl_pb
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct VarValue {
     pub location: Location,
@@ -68,10 +101,40 @@ pub struct VarValue {
     pub docs: DocCollection,
 }
 
+impl VarValue {
+    pub fn get_proto_representation(&self) -> VarValueProto {
+        let mut var_value_pb = VarValueProto::new();
+        var_value_pb.set_location(self.location.get_proto_representation());
+        match &self.expression {
+            Some(expr) => var_value_pb.set_expression(expr.get_proto_representation()),
+            None => ()
+        };
+          match &self.constant {
+            Some(expr) => var_value_pb.set_constant(expr.get_proto_representation()),
+            None => ()
+        };
+        var_value_pb.set_being_evaluated(self.being_evaluated);
+        var_value_pb.set_docs(self.docs.get_proto_representation());
+        var_value_pb
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct TypeVar {
     pub value: VarValue,
     pub declaration: Option<VarDeclaration>,
+}
+
+impl TypeVar {
+    pub fn get_proto_representation(&self) -> TypeVarProto {
+        let mut type_var_pb = TypeVarProto::new();
+        type_var_pb.set_value(self.value.get_proto_representation());
+        match &self.declaration {
+            Some(expr) => type_var_pb.set_declaration(expr.get_proto_representation()),
+            None => (),
+        };
+        type_var_pb
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -83,6 +146,18 @@ pub struct ProcDeclaration {
     pub is_protected: bool,
 }
 
+impl ProcDeclaration {
+    pub fn get_proto_representation(&self) -> ProcDeclarationProto {
+        let mut proc_decl_pb = ProcDeclarationProto::new();
+        proc_decl_pb.set_location(self.location.get_proto_representation());
+        proc_decl_pb.set_kind(self.kind.get_proto_representation());
+        proc_decl_pb.set_id(self.id.get_proto_representation());
+        proc_decl_pb.set_is_private(self.is_private);
+        proc_decl_pb.set_is_protected(self.is_protected);
+        proc_decl_pb
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct ProcValue {
     pub location: Location,
@@ -91,12 +166,54 @@ pub struct ProcValue {
     pub code: Code,
 }
 
+impl ProcValue {
+    pub fn get_proto_representation(&self) -> ProcValueProto {
+        let mut proc_value_pb = ProcValueProto::new();
+        proc_value_pb.set_location(self.location.get_proto_representation());
+        for p in &self.parameters {
+            proc_value_pb.mut_parameter().push(p.get_proto_representation());
+        }
+        proc_value_pb.set_docs(self.docs.get_proto_representation());
+        proc_value_pb.set_code(self.code.clone().get_proto_representation());
+        proc_value_pb
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum Code {
     Present(Block),
     Invalid(DMError),
     Builtin,
     Disabled,
+}
+
+fn block_to_proto(block: &Block) -> BlockProto {
+    let mut block_pb = BlockProto::new();
+    for s in block {
+        block_pb.mut_statement().push(s.elem.get_proto_representation());
+    }
+    block_pb
+}
+
+impl Code {
+    pub fn get_proto_representation(self) -> CodeProto {
+        let mut code_pb = CodeProto::new();
+        match self {
+            Code::Present(block) => {
+                code_pb.set_present(block_to_proto(&block));
+            },
+            Code::Invalid(_err) => {
+                code_pb.set_invalid(true);
+            },
+            Code::Builtin => {
+                code_pb.set_builtin(true);
+            },
+            Code::Disabled => {
+                code_pb.set_disabled(true);
+            }
+        }
+        code_pb
+    }
 }
 
 #[derive(Debug, Clone, Default)]
@@ -109,6 +226,18 @@ impl TypeProc {
     #[inline]
     pub fn main_value(&self) -> &ProcValue {
         self.value.last().expect("TypeProc::value is empty")
+    }
+
+    pub fn get_proto_representation(&self) -> TypeProcProto {
+        let mut type_proc_pb = TypeProcProto::new();
+        for va in &self.value {
+            type_proc_pb.mut_value().push(va.get_proto_representation());
+        }
+        match &self.declaration {
+            Some(expr) => type_proc_pb.set_declaration(expr.get_proto_representation()),
+            None => (),
+        }
+        type_proc_pb
     }
 }
 
@@ -186,6 +315,25 @@ impl Type {
             current = objtree.parent_of(ty);
         }
         None
+    }
+
+    pub fn get_proto_representation<'a>(&'a self) -> TypeProto {
+        let mut result = TypeProto::new();
+        result.set_name(self.name.clone());
+        result.set_path(self.path.clone());
+        result.set_location(self.location.get_proto_representation());
+        result.set_location_specificity(self.location_specificity.clone().try_into().unwrap());
+        for (key, type_var) in &self.vars {
+            result.mut_vars().insert(key.to_string(), type_var.get_proto_representation());
+        }
+        for (key, proc) in &self.procs {
+            result.mut_procs().insert(key.to_string(), proc.get_proto_representation());
+        }
+        //result.set_parent_type(self.parent_type);
+        result.set_docs(self.docs.get_proto_representation());
+        result.set_symbol_id(self.id.get_proto_representation());
+
+        result
     }
 }
 
@@ -629,6 +777,7 @@ impl<'a> std::hash::Hash for ProcRef<'a> {
 pub struct ObjectTree {
     pub graph: Graph<Type, ()>,
     pub types: BTreeMap<String, NodeIndex>,
+    pub proto_graph: GraphProto,
     symbols: SymbolIdSource,
 }
 
@@ -637,6 +786,7 @@ impl Default for ObjectTree {
         let mut tree = ObjectTree {
             graph: Default::default(),
             types: Default::default(),
+            proto_graph: GraphProto::new(),
             symbols: SymbolIdSource::new(SymbolIdCategory::ObjectTree),
         };
         tree.graph.add_node(Type {
@@ -938,6 +1088,7 @@ impl ObjectTree {
             type_path.push(prev.to_owned());
             prev = each;
         }
+        let type_path_for_proto = type_path.clone();
         let mut var_type = VarType {
             is_static,
             is_const,
@@ -951,6 +1102,24 @@ impl ObjectTree {
 
         let symbols = &mut self.symbols;
         let node = self.graph.node_weight_mut(parent).unwrap();
+        let mut tree_path_proto = TreePathProto::new();
+        for each in type_path_for_proto {
+            tree_path_proto.mut_s().push(each.clone());
+        }
+        //  if !suffix.list.is_empty() {
+        //     tree_path_proto.mut_s().insert(0, "list".to_owned());
+        // }
+        // let mut var_type_proto = VarTypeProto::new();
+
+        // var_type_proto.set_is_static(is_static);
+        // var_type_proto.set_is_const(is_const);
+        // var_type_proto.set_is_tmp(is_tmp);
+        // var_type_proto.set_is_final(is_final);
+        // var_type_proto.set_is_private(is_private);
+        // var_type_proto.set_is_protected(is_protected);
+        // var_type_proto.set_type_path(tree_path_proto);
+
+//self.proto_vartypes.mut_var_type().push(var_type_proto);
         // TODO: warn and merge docs for repeats
         Ok(Some(node.vars.entry(prev.to_owned()).or_insert_with(|| TypeVar {
             value: VarValue {
