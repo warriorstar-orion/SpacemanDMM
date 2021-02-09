@@ -185,7 +185,7 @@ pub enum Code {
 
 fn block_to_proto(block: &Block) -> BlockProto {
     let mut block_pb = BlockProto::new();
-    for s in block {
+    for s in block.iter() {
         block_pb.mut_statement().push(s.elem.get_proto_representation());
     }
     block_pb

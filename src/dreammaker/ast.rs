@@ -330,6 +330,9 @@ impl AssignOp {
     AssignOp::BitXorAssign => AssignOpProto::ASSIGNOP_BIT_XOR_ASSIGN,
     AssignOp::LShiftAssign => AssignOpProto::ASSIGNOP_L_SHIFT_ASSIGN,
     AssignOp::RShiftAssign => AssignOpProto::ASSIGNOP_R_SHIFT_ASSIGN,
+    AssignOp::AssignInto => AssignOpProto::ASSIGNOP_ASSIGN_INTO,
+    AssignOp::AndAssign => AssignOpProto::ASSIGNOP_AND_ASSIGN,
+    AssignOp::OrAssign => AssignOpProto::ASSIGNOP_OR_ASSIGN,
         }
     }
 }
@@ -903,7 +906,10 @@ impl Term {
                 for e in args {
                     term_pb.mut_input().mut_args().push(e.get_proto_representation());
                 }
-                term_pb.mut_input().set_input_type(input_type.get_proto_representation());
+                match input_type {
+                    Some(expr) => term_pb.mut_input().set_input_type(expr.get_proto_representation()),
+                    None => (),
+                }
                 match in_list {
                     Some(expr) => term_pb.mut_input().set_in_list(expr.get_proto_representation()),
                     None => (),
@@ -1135,7 +1141,10 @@ impl Parameter {
             Some(expr) => param_pb.set_default(expr.get_proto_representation()),
             None => (),
         }
-        param_pb.set_input_type(self.input_type.get_proto_representation());
+        match self.input_type {
+            Some(expr) => param_pb.set_input_type(expr.get_proto_representation()),
+            None => (),
+        }
         match &self.in_list {
             Some(expr) => param_pb.set_in_list(expr.get_proto_representation()),
             None => (),
@@ -1387,12 +1396,7 @@ impl VarType {
 
     pub fn get_proto_representation(&self) -> VarTypeProto {
         let mut var_type_pb = VarTypeProto::new();
-        var_type_pb.set_is_static(self.is_static);
-        var_type_pb.set_is_const(self.is_const);
-        var_type_pb.set_is_tmp(self.is_tmp);
-        var_type_pb.set_is_final(self.is_final);
-        var_type_pb.set_is_private(self.is_private);
-        var_type_pb.set_is_protected(self.is_protected);
+        // TODO: Set these fields according to VarTypeFlags
         for path in &self.type_path {
             var_type_pb.mut_type_path().mut_s().push(path.to_string());
         }
@@ -1536,7 +1540,7 @@ pub enum Statement {
 
 fn block_to_proto(block: &Block) -> BlockProto {
     let mut block_pb = BlockProto::new();
-    for s in block {
+    for s in block.iter() {
         block_pb.mut_statement().push(s.elem.get_proto_representation());
     }
     block_pb
@@ -1595,7 +1599,10 @@ impl Statement {
                     None => (),
                 }
                 statement_pb.mut_for_list().set_name(name.to_string());
-                statement_pb.mut_for_list().set_input_type(input_type.get_proto_representation());
+                match input_type {
+                    Some(expr) =>statement_pb.mut_for_list().set_input_type(expr.get_proto_representation()),
+                    None => (),
+                }
                 match in_list {
                     Some(expr) => statement_pb.mut_for_list().set_in_list(expr.get_proto_representation()),
                     None => (),
@@ -1657,7 +1664,7 @@ impl Statement {
             },
             Statement::Switch {input, cases, default} => {
                 statement_pb.mut_switch().set_input(input.get_proto_representation());
-                for case in cases {
+                for case in cases.iter() {
                     let mut cases_pb = SwitchCasesProto::new();
                     for s in &case.0.elem {
                         cases_pb.mut_case().push(s.get_proto_representation());
