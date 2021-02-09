@@ -9,6 +9,50 @@ use linked_hash_map::LinkedHashMap;
 
 use crate::error::Location;
 
+use super::protos::ast::Block as BlockProto;
+use super::protos::ast::DoWhile as DoWhileProto;
+use super::protos::ast::ForLoop as ForLoopProto;
+use super::protos::ast::ForRange as ForRangeProto;
+use super::protos::ast::If as IfProto;
+use super::protos::ast::IfArm as IfArmProto;
+use super::protos::ast::Parameter as ParameterProto;
+use super::protos::ast::ProcDeclKind as ProcDeclKindProto;
+use super::protos::ast::SettingMode as SettingModeProto;
+use super::protos::ast::Statement as StatementProto;
+use super::protos::ast::SwitchCase as SwitchCaseProto;
+use super::protos::ast::SwitchCases as SwitchCasesProto;
+use super::protos::ast::TreePath as TreePathProto;
+use super::protos::ast::VarStatement as VarStatementProto;
+use super::protos::ast::VarType as VarTypeProto;
+use super::protos::ast::While as WhileProto;
+use super::protos::ast::AssignOp as AssignOpProto;
+use super::protos::ast::BinaryOp as BinaryOpProto;
+use super::protos::ast::PathOp as PathOpProto;
+use super::protos::ast::UnaryOp as UnaryOpProto;
+use super::protos::ast::AssignOpExpression as AssignOpExpressionProto;
+use super::protos::ast::BaseExpression as BaseExpressionProto;
+use super::protos::ast::BinaryOpExpression as BinaryOpExpressionProto;
+use super::protos::ast::EnumValue as EnumValueProtoEnum;
+use super::protos::ast::Expression as ExpressionProto;
+use super::protos::ast::Field as FieldProto;
+use super::protos::ast::Follow as FollowProto;
+use super::protos::ast::FollowCall as FollowCallProto;
+use super::protos::ast::IndexKind as IndexKindProto;
+use super::protos::ast::IndexOrField as IndexOrFieldProto;
+use super::protos::ast::InputType as InputTypeProto;
+use super::protos::ast::InterpString as InterpStringProto;
+use super::protos::ast::InterpStringCollection as InterpStringCollectionProto;
+use super::protos::ast::New as NewProto;
+use super::protos::ast::NewType as NewTypeProto;
+use super::protos::ast::ParentCall as ParentCallProto;
+use super::protos::ast::PickPair as PickPairProto;
+use super::protos::ast::Prefab as PrefabProto;
+use super::protos::ast::SelfCall as SelfCallProto;
+use super::protos::ast::Term as TermProto;
+use super::protos::ast::TermCall as TermCallProto;
+use super::protos::ast::TernaryOpExpression as TernaryOpExpressionProto;
+use super::protos::ast::TypePath as TypePathProto;
+
 #[derive(Copy, Clone, Eq, Debug)]
 pub struct Spanned<T> {
     // TODO: add a Span type and use it here
@@ -59,6 +103,19 @@ impl UnaryOp {
             PreDecr | PostDecr => "--",
         }
     }
+
+    pub fn get_proto_representation(self) -> UnaryOpProto {
+        use self::UnaryOp::*;
+        match self {
+            Neg => UnaryOpProto::UNARYOP_NEG,
+            Not => UnaryOpProto::UNARYOP_NOT,
+            BitNot => UnaryOpProto::UNARYOP_BIT_NOT,
+            PreIncr => UnaryOpProto::UNARYOP_PRE_INCR,
+            PostIncr =>  UnaryOpProto::UNARYOP_POST_INCR,
+            PreDecr => UnaryOpProto::UNARYOP_PRE_DECR,
+            PostDecr => UnaryOpProto::UNARYOP_POST_DECR,
+        }
+    }
 }
 
 /// A formatting wrapper created by `UnaryOp::around`.
@@ -103,6 +160,14 @@ impl PathOp {
             PathOp::Slash => "/",
             PathOp::Dot => ".",
             PathOp::Colon => ":",
+        }
+    }
+
+    pub fn get_proto_representation(self) -> PathOpProto {
+        match self {
+            PathOp::Slash => PathOpProto::PATHOP_SLASH,
+            PathOp::Dot => PathOpProto::PATHOP_DOT,
+            PathOp::Colon => PathOpProto::PATHOP_COLON,
         }
     }
 }
@@ -169,6 +234,38 @@ pub enum BinaryOp {
     To,  // only appears in RHS of `In`
 }
 
+impl BinaryOp {
+    pub fn get_proto_representation(self) -> BinaryOpProto {
+       return match self {
+
+    BinaryOp::Add => BinaryOpProto::BINARYOP_ADD,
+    BinaryOp::Sub => BinaryOpProto::BINARYOP_SUB,
+    BinaryOp::Mul => BinaryOpProto::BINARYOP_MUL,
+    BinaryOp::Div => BinaryOpProto::BINARYOP_DIV,
+    BinaryOp::Pow => BinaryOpProto::BINARYOP_POW,
+    BinaryOp::Mod => BinaryOpProto::BINARYOP_MOD,
+    BinaryOp::Eq => BinaryOpProto::BINARYOP_EQ,
+    BinaryOp::NotEq => BinaryOpProto::BINARYOP_NOTEQ,
+    BinaryOp::Less => BinaryOpProto::BINARYOP_LESS,
+    BinaryOp::Greater => BinaryOpProto::BINARYOP_GREATER,
+    BinaryOp::LessEq => BinaryOpProto::BINARYOP_LESSEQ,
+    BinaryOp::GreaterEq => BinaryOpProto::BINARYOP_GREATEREQ,
+    BinaryOp::Equiv => BinaryOpProto::BINARYOP_EQUIV,
+    BinaryOp::NotEquiv => BinaryOpProto::BINARYOP_NOTEQUIV,
+    BinaryOp::BitAnd => BinaryOpProto::BINARYOP_BITAND,
+    BinaryOp::BitXor => BinaryOpProto::BINARYOP_BITXOR,
+    BinaryOp::BitOr => BinaryOpProto::BINARYOP_BITOR,
+    BinaryOp::LShift => BinaryOpProto::BINARYOP_LSHIFT,
+    BinaryOp::RShift => BinaryOpProto::BINARYOP_RSHIFT,
+    BinaryOp::And => BinaryOpProto::BINARYOP_AND,
+    BinaryOp::Or => BinaryOpProto::BINARYOP_OR,
+    BinaryOp::In => BinaryOpProto::BINARYOP_IN,
+    BinaryOp::To => BinaryOpProto::BINARYOP_TO,
+
+        }
+    }
+}
+
 impl fmt::Display for BinaryOp {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         use self::BinaryOp::*;
@@ -217,6 +314,24 @@ pub enum AssignOp {
     BitXorAssign,
     LShiftAssign,
     RShiftAssign,
+}
+
+impl AssignOp {
+    pub fn get_proto_representation(self) -> AssignOpProto {
+        return match self {
+    AssignOp::Assign => AssignOpProto::ASSIGNOP_ASSIGN,
+    AssignOp::AddAssign => AssignOpProto::ASSIGNOP_ADD_ASSIGN,
+    AssignOp::SubAssign => AssignOpProto::ASSIGNOP_SUB_ASSIGN,
+    AssignOp::MulAssign => AssignOpProto::ASSIGNOP_MUL_ASSIGN,
+    AssignOp::DivAssign => AssignOpProto::ASSIGNOP_DIV_ASSIGN,
+    AssignOp::ModAssign => AssignOpProto::ASSIGNOP_MOD_ASSIGN,
+    AssignOp::BitAndAssign => AssignOpProto::ASSIGNOP_BIT_AND_ASSIGN,
+    AssignOp::BitOrAssign => AssignOpProto::ASSIGNOP_BIT_OR_ASSIGN,
+    AssignOp::BitXorAssign => AssignOpProto::ASSIGNOP_BIT_XOR_ASSIGN,
+    AssignOp::LShiftAssign => AssignOpProto::ASSIGNOP_L_SHIFT_ASSIGN,
+    AssignOp::RShiftAssign => AssignOpProto::ASSIGNOP_R_SHIFT_ASSIGN,
+        }
+    }
 }
 
 impl fmt::Display for AssignOp {
@@ -289,6 +404,22 @@ pub struct Prefab {
     pub vars: LinkedHashMap<Ident, Expression>,
 }
 
+impl Prefab {
+    pub fn get_proto_representation(&self) -> PrefabProto {
+        let mut prefab_pb = PrefabProto::new();
+        for p in &self.path {
+            let mut path_pb = TypePathProto::new();
+            path_pb.set_path_op(p.0.get_proto_representation());
+            path_pb.set_s(p.1.to_string());
+            prefab_pb.mut_path().push(path_pb);
+        }
+        for (key, value) in &self.vars {
+            prefab_pb.mut_vars().insert(key.to_string(), value.get_proto_representation());
+        }
+        prefab_pb
+    }
+}
+
 impl From<TypePath> for Prefab {
     fn from(path: TypePath) -> Self {
         Prefab {
@@ -331,6 +462,23 @@ pub enum NewType {
         ident: Ident,
         fields: Vec<IndexOrField>,
     },
+}
+
+impl NewType {
+    pub fn get_proto_representation<'a>(&'a self) -> NewTypeProto {
+        let mut ntp_pb = NewTypeProto::new();
+        match self {
+            NewType::Implicit => ntp_pb.set_implicit(true),
+            NewType::Prefab(p) => ntp_pb.set_prefab(p.get_proto_representation()),
+            NewType::MiniExpr{ident, fields} => {
+                ntp_pb.mut_mini_expr().set_ident(ident.to_string());
+                for field in fields {
+                    ntp_pb.mut_mini_expr().mut_fields().push(field.get_proto_representation());
+                }
+            }
+        }
+        return ntp_pb;
+    }
 }
 
 /// The structure of an expression, a tree of terms and operators.
@@ -483,6 +631,45 @@ impl Expression {
             }
         }
     }
+
+    pub fn get_proto_representation<'a>(&'a self) -> ExpressionProto {
+        let mut expr_pb = ExpressionProto::new();
+           match self {
+            Expression::Base { unary, term, follow } => {
+                let mut base_pb = BaseExpressionProto::new();
+                for u in unary {
+                    base_pb.mut_unary().push(u.get_proto_representation());
+                }
+                base_pb.set_term(term.elem.get_proto_representation());
+                for f in follow {
+                    base_pb.mut_follow().push(f.elem.get_proto_representation());
+                }
+                expr_pb.set_base(base_pb);
+            },
+            Expression::BinaryOp { op, lhs, rhs } => {
+                let mut binary_op_pb = BinaryOpExpressionProto::new();
+                binary_op_pb.set_op(op.get_proto_representation());
+                binary_op_pb.set_lhs(lhs.get_proto_representation());
+                binary_op_pb.set_rhs(rhs.get_proto_representation());
+                expr_pb.set_binary_op(binary_op_pb);
+            },
+            Expression::AssignOp { op, lhs, rhs } => {
+                let mut assign_op_pb = AssignOpExpressionProto::new();
+                assign_op_pb.set_op(op.get_proto_representation());
+                assign_op_pb.set_lhs(lhs.get_proto_representation());
+                assign_op_pb.set_rhs(rhs.get_proto_representation());
+                expr_pb.set_assign_op(assign_op_pb);
+            },
+            Expression::TernaryOp { cond, if_, else_ } => {
+                let mut ternary_op_pb = TernaryOpExpressionProto::new();
+                ternary_op_pb.set_cond_expr(cond.get_proto_representation());
+                ternary_op_pb.set_if_expr(if_.get_proto_representation());
+                ternary_op_pb.set_else_expr(else_.get_proto_representation());
+                expr_pb.set_ternary_op(ternary_op_pb);
+            }
+        }
+        expr_pb
+    }
 }
 
 impl From<Term> for Expression {
@@ -621,6 +808,138 @@ impl Term {
         }
         None
     }
+
+    pub fn get_proto_representation(&self) -> TermProto {
+        let mut term_pb = TermProto::new();
+        match self {
+            Term::Null => {
+                term_pb.set_null_t(true);
+            },
+            Term::Int(i) => {
+                term_pb.set_int_t(*i);
+            },
+            Term::Float(i) => {
+                term_pb.set_float_t(*i);
+            },
+            Term::Ident(s) => {
+                term_pb.set_ident(s.to_string());
+            },
+            Term::String(s) => {
+                term_pb.set_string_t(s.to_string());
+            },
+            Term::Resource(s) => {
+                term_pb.set_resource(s.to_string());
+            },
+            Term::As(t) => {
+                term_pb.set_as_t(t.get_proto_representation());
+            }
+
+            Term::Expr(e) => {
+                term_pb.set_expr(e.get_proto_representation());
+            },
+            Term::Prefab(p) => {
+                term_pb.set_prefab(p.get_proto_representation());
+            },
+            Term::InterpString(s, strings) => {
+                let mut interp_string_pb = InterpStringProto::new();
+                interp_string_pb.set_s(s.to_string());
+                for st in strings {
+                    let mut collection_pb = InterpStringCollectionProto::new();
+                    match &st.0 {
+                        Some(expr) => collection_pb.set_expr(expr.get_proto_representation()),
+                        None => ()
+                    }
+                    collection_pb.set_s(st.1.to_string());
+                    interp_string_pb.mut_collections().push(collection_pb);
+                }
+
+                term_pb.set_interp_string(interp_string_pb);
+            },
+
+            Term::Call(s, exprs) => {
+                let mut term_call_pb = TermCallProto::new();
+                term_call_pb.set_s(s.to_string());
+
+                for e in exprs {
+                    term_call_pb.mut_expr().push(e.get_proto_representation());
+                }
+                term_pb.set_call(term_call_pb);
+            },
+            Term::SelfCall(exprs) => {
+                let mut self_call_pb = SelfCallProto::new();
+                for e in exprs {
+                    self_call_pb.mut_expr().push(e.get_proto_representation());
+                }
+                term_pb.set_self_call(self_call_pb);
+            },
+            Term::ParentCall(exprs) => {
+                let mut parent_call_pb = ParentCallProto::new();
+                for e in exprs {
+                    parent_call_pb.mut_expr().push(e.get_proto_representation());
+                }
+                term_pb.set_parent_call(parent_call_pb);
+            },
+            Term::New{type_, args} => {
+                let mut new_pb = NewProto::new();
+                new_pb.set_field_type(type_.get_proto_representation());
+                match args {
+                    Some(expr) => {
+                            for e in expr {
+                    new_pb.mut_args().push(e.get_proto_representation());
+                }
+                    },
+                    None => (),
+                }
+
+                term_pb.set_new(new_pb);
+            },
+            Term::List(exprs) => {
+                term_pb.mut_list().set_is_set(true);
+                for e in exprs {
+                    term_pb.mut_list().mut_call().push(e.get_proto_representation());
+                }
+            },
+            Term::Input{args, input_type, in_list} => {
+                for e in args {
+                    term_pb.mut_input().mut_args().push(e.get_proto_representation());
+                }
+                term_pb.mut_input().set_input_type(input_type.get_proto_representation());
+                match in_list {
+                    Some(expr) => term_pb.mut_input().set_in_list(expr.get_proto_representation()),
+                    None => (),
+                }
+            },
+            Term::Locate{args, in_list} => {
+                for e in args {
+                    term_pb.mut_locate().mut_args().push(e.get_proto_representation());
+                }
+                match in_list {
+                    Some(expr) => term_pb.mut_locate().set_in_list(expr.get_proto_representation()),
+                    None => (),
+                }
+            },
+            Term::Pick(/*list of opt expr to expr tuples */l) => {
+                for tuple in l {
+                    let mut pp_pb = PickPairProto::new();
+                    match &tuple.0 {
+                        Some(expr) => pp_pb.set_first(expr.get_proto_representation()),
+                        None => (),
+                    }
+                    pp_pb.set_second(tuple.1.get_proto_representation());
+                    term_pb.mut_pick().mut_pick().push(pp_pb);
+                }
+            },
+            Term::DynamicCall(l1, l2) => {
+                for expr in l1 {
+                    term_pb.mut_dynamic_call().mut_first().push(expr.get_proto_representation());
+                }
+                for expr in l2 {
+                    term_pb.mut_dynamic_call().mut_second().push(expr.get_proto_representation());
+                }
+            }
+        };
+        term_pb
+    }
 }
 
 impl From<Expression> for Term {
@@ -661,6 +980,15 @@ impl IndexKind {
             IndexKind::SafeColon => "?:",
         }
     }
+
+    pub fn get_proto_representation(&self) -> IndexKindProto {
+       match self {
+            IndexKind::Dot => IndexKindProto::INDEX_KIND_DOT,
+            IndexKind::Colon => IndexKindProto::INDEX_KIND_COLON,
+            IndexKind::SafeDot => IndexKindProto::INDEX_KIND_SAFE_DOT,
+            IndexKind::SafeColon => IndexKindProto::INDEX_KIND_SAFE_COLON,
+        }
+    }
 }
 
 impl fmt::Display for IndexKind {
@@ -680,6 +1008,33 @@ pub enum Follow {
     Call(IndexKind, Ident, Vec<Expression>),
 }
 
+impl Follow {
+    pub fn get_proto_representation(&self) -> FollowProto {
+        let mut follow_pb = FollowProto::new();
+        match self {
+            Follow::Index(e) => {
+                follow_pb.set_index(e.get_proto_representation());
+            },
+            Follow::Field(i, s) => {
+                let mut field_pb = FieldProto::new();
+                field_pb.set_index_kind(i.get_proto_representation());
+                field_pb.set_s(s.to_string());
+                follow_pb.set_field(field_pb);
+             },
+             Follow::Call(i, s, exprs) => {
+                let mut call_pb = FollowCallProto::new();
+                call_pb.set_index_kind(i.get_proto_representation());
+                call_pb.set_s(s.to_string());
+                for expr in exprs {
+                    call_pb.mut_expr().push(expr.get_proto_representation());
+                }
+                follow_pb.set_call(call_pb);
+             }
+        }
+        follow_pb
+    }
+}
+
 /// Like a `Follow` but supports index or fields only.
 #[derive(Debug, Clone, PartialEq)]
 pub enum IndexOrField {
@@ -687,6 +1042,20 @@ pub enum IndexOrField {
     Index(Box<Expression>),
     /// Access a field of the value.
     Field(IndexKind, Ident),
+}
+
+impl IndexOrField {
+     pub fn get_proto_representation(&self) -> IndexOrFieldProto {
+        let mut iof_pb = IndexOrFieldProto::new();
+        match self {
+            IndexOrField::Index(expr) => iof_pb.set_index(expr.get_proto_representation()),
+            IndexOrField::Field(ik, s) => {
+                iof_pb.mut_field().set_index_kind(ik.get_proto_representation());
+                iof_pb.mut_field().set_s(s.to_string());
+            }
+        }
+        return iof_pb;
+     }
 }
 
 impl From<IndexOrField> for Follow {
@@ -731,6 +1100,13 @@ impl ProcDeclKind {
             ProcDeclKind::Verb => "verb",
         }
     }
+
+    pub fn get_proto_representation(self) -> ProcDeclKindProto {
+        match self {
+            ProcDeclKind::Proc => ProcDeclKindProto::PROC_DECL_KIND_PROC,
+            ProcDeclKind::Verb => ProcDeclKindProto::PROC_DECL_KIND_VERB,
+        }
+    }
 }
 
 impl fmt::Display for ProcDeclKind {
@@ -750,6 +1126,25 @@ pub struct Parameter {
     pub location: Location,
 }
 
+impl Parameter {
+    pub fn get_proto_representation(&self)  -> ParameterProto {
+        let mut param_pb = ParameterProto::new();
+        param_pb.set_var_type(self.var_type.get_proto_representation());
+        param_pb.set_name(self.name.to_string());
+        match &self.default {
+            Some(expr) => param_pb.set_default(expr.get_proto_representation()),
+            None => (),
+        }
+        param_pb.set_input_type(self.input_type.get_proto_representation());
+        match &self.in_list {
+            Some(expr) => param_pb.set_in_list(expr.get_proto_representation()),
+            None => (),
+        }
+        param_pb.set_location(self.location.get_proto_representation());
+        param_pb
+    }
+}
+
 impl fmt::Display for Parameter {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}{}", self.var_type, self.name)?;
@@ -761,7 +1156,7 @@ impl fmt::Display for Parameter {
 }
 
 macro_rules! type_table {
-    ($(#[$attr:meta])* pub struct $name:ident; $($txt:expr, $i:ident, $val:expr;)*) => {
+    ($(#[$attr:meta])* pub struct $name:ident; $($txt:expr, $i:ident, $val:expr, $proto:expr;)*) => {
         bitflags! {
             $(#[$attr])*
             /// A type specifier for verb arguments and input() calls.
@@ -779,7 +1174,40 @@ macro_rules! type_table {
                     _ => None,
                 }
             }
+
+            pub fn get_proto_representation(self) -> InputTypeProto {
+                let mut input_type_pb = InputTypeProto::new();
+                $(
+                    if self.contains($name::$i) {
+                        input_type_pb.mut_key_name().push($proto);
+                    }
+                )*
+                input_type_pb.set_val(0);
+                input_type_pb.set_display(format!("{}", self));
+                return input_type_pb;
+                //InputTypeProto::INPUT_TYPE_ERROR_UNKNOWN
+                // if self.contains(InputType::MOB) {
+                //     return InputTypeProto::INPUT_TYPE_MOB;
+                // }
+                // if self.contains(InputType::OBJ) { return InputTypeProto::INPUT_TYPE_OBJ; }
+                // if self.contains(InputType::TEXT) { return InputTypeProto::INPUT_TYPE_TEXT; }
+                // if self.contains(InputType::NUM) { return InputTypeProto::INPUT_TYPE_NUM; }
+                // if self.contains(InputType::FILE) { return InputTypeProto::INPUT_TYPE_FILE; }
+                // if self.contains(InputType::TURF) { return InputTypeProto::INPUT_TYPE_TURF; }
+                // if self.contains(InputType::KEY) { return InputTypeProto::INPUT_TYPE_KEY; }
+                // if self.contains(InputType::NULL) { return InputTypeProto::INPUT_TYPE_NULL; }
+                // if self.contains(InputType::AREA) { return InputTypeProto::INPUT_TYPE_AREA; }
+                // if self.contains(InputType::ICON) { return InputTypeProto::INPUT_TYPE_ICON; }
+                // if self.contains(InputType::SOUND) { return InputTypeProto::INPUT_TYPE_SOUND; }
+                // if self.contains(InputType::MESSAGE) { return InputTypeProto::INPUT_TYPE_MESSAGE; }
+                // if self.contains(InputType::ANYTHING) { return InputTypeProto::INPUT_TYPE_ANYTHING; }
+                // if self.contains(InputType::PASSWORD) { return InputTypeProto::INPUT_TYPE_PASSWORD; }
+                // if self.contains(InputType::COMMAND_TEXT) { return InputTypeProto::INPUT_TYPE_COMMAND_TEXT; }
+                // if self.contains(InputType::COLOR) { return InputTypeProto::INPUT_TYPE_COLOR; }
+                // return InputTypeProto::INPUT_TYPE_ERROR_UNKNOWN;
+             }
         }
+
 
         impl fmt::Display for $name {
             fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
@@ -805,22 +1233,26 @@ type_table! {
 
     // These values can be known with an invocation such as:
     //     src << as(command_text)
-    "mob",          MOB,          1 << 0;
-    "obj",          OBJ,          1 << 1;
-    "text",         TEXT,         1 << 2;
-    "num",          NUM,          1 << 3;
-    "file",         FILE,         1 << 4;
-    "turf",         TURF,         1 << 5;
-    "key",          KEY,          1 << 6;
-    "null",         NULL,         1 << 7;
-    "area",         AREA,         1 << 8;
-    "icon",         ICON,         1 << 9;
-    "sound",        SOUND,        1 << 10;
-    "message",      MESSAGE,      1 << 11;
-    "anything",     ANYTHING,     1 << 12;
-    "password",     PASSWORD,     1 << 15;
-    "command_text", COMMAND_TEXT, 1 << 16;
-    "color",        COLOR,        1 << 17;
+    "mob",          MOB,          1 << 0,  EnumValueProtoEnum::INPUT_TYPE_MOB;
+    "obj",          OBJ,          1 << 1,  EnumValueProtoEnum::INPUT_TYPE_OBJ;
+    "text",         TEXT,         1 << 2,  EnumValueProtoEnum::INPUT_TYPE_TEXT;
+    "num",          NUM,          1 << 3,  EnumValueProtoEnum::INPUT_TYPE_NUM;
+    "file",         FILE,         1 << 4,  EnumValueProtoEnum::INPUT_TYPE_FILE;
+    "turf",         TURF,         1 << 5,  EnumValueProtoEnum::INPUT_TYPE_TURF;
+    "key",          KEY,          1 << 6,  EnumValueProtoEnum::INPUT_TYPE_KEY;
+    "null",         NULL,         1 << 7,  EnumValueProtoEnum::INPUT_TYPE_NULL;
+    "area",         AREA,         1 << 8,  EnumValueProtoEnum::INPUT_TYPE_AREA;
+    "icon",         ICON,         1 << 9,  EnumValueProtoEnum::INPUT_TYPE_ICON;
+    "sound",        SOUND,        1 << 10, EnumValueProtoEnum::INPUT_TYPE_SOUND;
+    "message",      MESSAGE,      1 << 11, EnumValueProtoEnum::INPUT_TYPE_MESSAGE;
+    "anything",     ANYTHING,     1 << 12, EnumValueProtoEnum::INPUT_TYPE_ANYTHING;
+    "password",     PASSWORD,     1 << 15, EnumValueProtoEnum::INPUT_TYPE_PASSWORD;
+    "command_text", COMMAND_TEXT, 1 << 16, EnumValueProtoEnum::INPUT_TYPE_COMMAND_TEXT;
+    "color",        COLOR,        1 << 17, EnumValueProtoEnum::INPUT_TYPE_COLOR;
+}
+
+impl InputType {
+
 }
 
 bitflags! {
@@ -951,6 +1383,20 @@ impl VarType {
         if !suffix.list.is_empty() {
             self.type_path.insert(0, "list".to_owned());
         }
+    }
+
+    pub fn get_proto_representation(&self) -> VarTypeProto {
+        let mut var_type_pb = VarTypeProto::new();
+        var_type_pb.set_is_static(self.is_static);
+        var_type_pb.set_is_const(self.is_const);
+        var_type_pb.set_is_tmp(self.is_tmp);
+        var_type_pb.set_is_final(self.is_final);
+        var_type_pb.set_is_private(self.is_private);
+        var_type_pb.set_is_protected(self.is_protected);
+        for path in &self.type_path {
+            var_type_pb.mut_type_path().mut_s().push(path.to_string());
+        }
+        var_type_pb
     }
 }
 
@@ -1088,11 +1534,202 @@ pub enum Statement {
     Crash(Expression),
 }
 
+fn block_to_proto(block: &Block) -> BlockProto {
+    let mut block_pb = BlockProto::new();
+    for s in block {
+        block_pb.mut_statement().push(s.elem.get_proto_representation());
+    }
+    block_pb
+}
+
+impl Statement {
+    pub fn get_proto_representation(&self) -> StatementProto {
+        let mut statement_pb = StatementProto::new();
+        match self {
+            Statement::Expr(expr) => {
+                statement_pb.mut_expr().set_is_set(true);
+                statement_pb.mut_expr().set_expr(expr.get_proto_representation());
+            },
+            Statement::Return(expr) => {
+                statement_pb.mut_return_s().set_is_set(true);
+                match expr {
+                    Some(e) => statement_pb.mut_return_s().set_expr(e.get_proto_representation()),
+                    None => (),
+                }
+            },
+            Statement::Throw(expr) => {
+                statement_pb.mut_throw().set_is_set(true);
+                statement_pb.mut_throw().set_expr(expr.get_proto_representation());
+            },
+            Statement::While {condition, block} => {
+                let mut while_pb = WhileProto::new();
+                while_pb.set_condition(condition.get_proto_representation());
+                while_pb.set_block(block_to_proto(block));
+                statement_pb.set_while_s(while_pb);
+            },
+            Statement::DoWhile {block, condition: spanned} => {
+                let mut do_while_pb = DoWhileProto::new();
+                do_while_pb.set_condition(spanned.elem.get_proto_representation());
+                do_while_pb.set_block(block_to_proto(block));
+                statement_pb.set_do_while(do_while_pb);
+            },
+            Statement::If {arms, else_arm} => {
+                let mut if_pb = IfProto::new();
+                for arm in arms {
+                    let mut if_arm_pb = IfArmProto::new();
+                    if_arm_pb.set_expr(arm.0.elem.get_proto_representation());
+                    if_arm_pb.set_block(block_to_proto(&arm.1));
+                    if_pb.mut_arm().push(if_arm_pb);
+                }
+                match else_arm {
+                    Some(expr) => if_pb.set_else_arm(block_to_proto(expr)),
+                    None => (),
+                }
+                statement_pb.set_if_s(if_pb);
+            },
+            Statement::ForList {var_type, name, input_type, in_list, block} => {
+                match var_type {
+                    Some(expr) => {
+                        statement_pb.mut_for_list().set_var_type(expr.get_proto_representation());
+                    },
+                    None => (),
+                }
+                statement_pb.mut_for_list().set_name(name.to_string());
+                statement_pb.mut_for_list().set_input_type(input_type.get_proto_representation());
+                match in_list {
+                    Some(expr) => statement_pb.mut_for_list().set_in_list(expr.get_proto_representation()),
+                    None => (),
+                }
+                statement_pb.mut_for_list().set_block(block_to_proto(block));
+            },
+            Statement::ForLoop {init, test, inc, block} => {
+                let mut for_loop_pb = ForLoopProto::new();
+                match init {
+                    Some(expr) => for_loop_pb.set_init(expr.get_proto_representation()),
+                    None => (),
+                };
+                match test {
+                    Some(expr) => for_loop_pb.set_test(expr.get_proto_representation()),
+                    None => (),
+                };
+                match inc {
+                    Some(expr) => for_loop_pb.set_inc(expr.get_proto_representation()),
+                    None => (),
+                }
+                for_loop_pb.set_block(block_to_proto(block));
+                statement_pb.set_for_loop(for_loop_pb);
+            },
+            Statement::ForRange {var_type, name, start, end, step, block} => {
+                let mut for_range_pb = ForRangeProto::new();
+                match var_type {
+                    Some(expr) => for_range_pb.set_var_type(expr.get_proto_representation()),
+                    None => (),
+                }
+                for_range_pb.set_name(name.to_string());
+                for_range_pb.set_start(start.get_proto_representation());
+                for_range_pb.set_end(end.get_proto_representation());
+                match step {
+                    Some(expr) => for_range_pb.set_step(expr.get_proto_representation()),
+                    None => (),
+                }
+                for_range_pb.set_block(block_to_proto(block));
+                statement_pb.set_for_range(for_range_pb);
+            },
+            Statement::Var(expr) => {
+                statement_pb.set_var(expr.get_proto_representation());
+            },
+            Statement::Vars(exprs) => {
+                for expr in exprs {
+                    statement_pb.mut_vars().push(expr.get_proto_representation());
+                }
+            },
+            Statement::Setting{name, mode, value} => {
+                statement_pb.mut_setting().set_name(name.to_string());
+                statement_pb.mut_setting().set_mode(mode.get_proto_representation());
+                statement_pb.mut_setting().set_value(value.get_proto_representation());
+            },
+            Statement::Spawn {delay, block} => {
+                match delay {
+                    Some(expr) => statement_pb.mut_spawn().set_delay(expr.get_proto_representation()),
+                    None => (),
+                }
+                statement_pb.mut_spawn().set_block(block_to_proto(block));
+            },
+            Statement::Switch {input, cases, default} => {
+                statement_pb.mut_switch().set_input(input.get_proto_representation());
+                for case in cases {
+                    let mut cases_pb = SwitchCasesProto::new();
+                    for s in &case.0.elem {
+                        cases_pb.mut_case().push(s.get_proto_representation());
+                    }
+                    cases_pb.set_block(block_to_proto(&case.1));
+                    statement_pb.mut_switch().mut_cases().push(cases_pb);
+                }
+                match default {
+                    Some(expr) => statement_pb.mut_switch().set_default(block_to_proto(expr)),
+                    None => (),
+                };
+            },
+            Statement::TryCatch { try_block, catch_params, catch_block} => {
+                statement_pb.mut_try_catch().set_try_block(block_to_proto(try_block));
+                for param in catch_params {
+                    let mut treepath_pb = TreePathProto::new();
+                    for s in param {
+                        treepath_pb.mut_s().push(s.to_string());
+                    }
+                    statement_pb.mut_try_catch().mut_catch_params().push(treepath_pb);
+                }
+
+                statement_pb.mut_try_catch().set_catch_block(block_to_proto(catch_block));
+            },
+            Statement::Continue(s) => {
+                match s {
+                    Some(expr) => statement_pb.mut_continue_s().set_s(expr.to_string()),
+                    None => (),
+                };
+            },
+            Statement::Break(s) => {
+                match s {
+                    Some(expr) => statement_pb.mut_break_s().set_s(expr.to_string()),
+                    None => (),
+                };
+            },
+              Statement::Goto(s) => {
+                statement_pb.mut_goto().set_s(s.to_string());
+            },
+              Statement::Label{name, block} => {
+                statement_pb.mut_label().set_name(name.to_string());
+                statement_pb.mut_label().set_block(block_to_proto(block));
+            },
+            Statement::Del(expr) => {
+                statement_pb.mut_del().set_expr(expr.get_proto_representation());
+            },
+            Statement::Crash(expr) => {
+                statement_pb.mut_crash().set_expr(expr.get_proto_representation());
+            }
+        }
+        statement_pb
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct VarStatement {
     pub var_type: VarType,
     pub name: Ident,
     pub value: Option<Expression>,
+}
+
+impl VarStatement {
+    pub fn get_proto_representation(&self) -> VarStatementProto {
+        let mut var_stmt_pb = VarStatementProto::new();
+        var_stmt_pb.set_var_type(self.var_type.get_proto_representation());
+        var_stmt_pb.set_name(self.name.to_string());
+        match &self.value {
+            Some(expr) => var_stmt_pb.set_value(expr.get_proto_representation()),
+            None => (),
+        };
+        var_stmt_pb
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -1111,6 +1748,13 @@ impl SettingMode {
             SettingMode::In => "in",
         }
     }
+
+    pub fn get_proto_representation(self) -> SettingModeProto{
+        return match self {
+            SettingMode::Assign => SettingModeProto::SETTING_MODE_ASSIGN,
+            SettingMode::In => SettingModeProto::SETTING_MODE_IN,
+        }
+    }
 }
 
 impl fmt::Display for SettingMode {
@@ -1123,6 +1767,22 @@ impl fmt::Display for SettingMode {
 pub enum Case {
     Exact(Expression),
     Range(Expression, Expression),
+}
+
+impl Case {
+    pub fn get_proto_representation(&self) -> SwitchCaseProto {
+        let mut switch_case_pb = SwitchCaseProto::new();
+        match self {
+            Case::Exact(expr) => {
+                switch_case_pb.set_exact(expr.get_proto_representation());
+            },
+            Case::Range(start, end) => {
+                switch_case_pb.mut_range().set_start(start.get_proto_representation());
+                switch_case_pb.mut_range().set_end(end.get_proto_representation());
+            },
+        }
+        switch_case_pb
+    }
 }
 
 pub const KNOWN_SETTING_NAMES: &[&str] = &[

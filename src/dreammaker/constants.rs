@@ -7,6 +7,14 @@ use linked_hash_map::LinkedHashMap;
 use ordered_float::OrderedFloat;
 
 use super::{DMError, Location, HasLocation, Context};
+use super::protos::ast::TreePath as TreePathProto;
+use super::protos::ast::Constant as ConstantProto;
+use super::protos::ast::ConstantNew as ConstantNewProto;
+use super::protos::ast::ConstFn as ConstFnProto;
+use super::protos::ast::ConstantList as ConstantListProto;
+use super::protos::ast::ConstantCall as ConstantCallProto;
+use super::protos::ast::Pop as PopProto;
+use super::protos::ast::Args as ArgsProto;
 use super::objtree::*;
 use super::ast::*;
 use super::preprocessor::DefineMap;
@@ -18,6 +26,19 @@ use super::preprocessor::DefineMap;
 pub struct Pop {
     pub path: TreePath,
     pub vars: LinkedHashMap<Ident, Constant>,
+}
+
+impl Pop {
+    pub fn get_proto_representation(&self) -> PopProto {
+        let mut pop_pb = PopProto::new();
+        for path in &self.path {
+            pop_pb.mut_tree_path().mut_s().push(path.to_string());
+        }
+        for (key, val) in &self.vars {
+            pop_pb.mut_vars().insert(key.to_string(), val.get_proto_representation());
+        }
+        pop_pb
+    }
 }
 
 impl From<TreePath> for Pop {
@@ -64,6 +85,91 @@ pub enum Constant {
     Int(i32),
     /// A floating-point literal.
     Float(f32),
+}
+
+impl Constant {
+    pub fn get_proto_representation(&self) -> ConstantProto {
+        let mut constant_pb = ConstantProto::new();
+        match self {
+            Constant::Null(tp) => {
+                let mut treepath_pb = TreePathProto::new();
+                match &tp {
+                    Some(t) => {
+                        for s in t {
+                             treepath_pb.mut_s().push(s.to_string());
+                        }
+                    },
+                    None => (),
+                }
+                constant_pb.set_null(treepath_pb);
+            },
+            Constant::New{type_, args} => {
+                let mut new_pb = ConstantNewProto::new();
+                match type_ {
+                    Some(t) => new_pb.set_pop_type(t.get_proto_representation()),
+                    None => (),
+                };
+                match args {
+                    Some(a) => {
+                        for i in a {
+                            let mut args_pb = ArgsProto::new();
+                            args_pb.set_first(i.0.get_proto_representation());
+                             match &i.1 {
+                                Some(expr) => args_pb.set_second(expr.get_proto_representation()),
+                                None => (),
+                            }
+                            new_pb.mut_args().push(args_pb);
+                        }
+                    },
+                    None => (),
+                };
+                constant_pb.set_new(new_pb);
+            },
+            Constant::List(args) => {
+                let mut list_pb = ConstantListProto::new();
+                for i in args {
+                    let mut args_pb = ArgsProto::new();
+                    args_pb.set_first(i.0.get_proto_representation());
+                    match &i.1 {
+                        Some(expr) => args_pb.set_second(expr.get_proto_representation()),
+                        None => (),
+                    }
+                    list_pb.mut_args().push(args_pb);
+                }
+                constant_pb.set_list(list_pb);
+            },
+            Constant::Call(func, args) => {
+                let mut call_pb = ConstantCallProto::new();
+                call_pb.set_const_fn(func.get_proto_representation());
+                for i in args {
+                    let mut args_pb = ArgsProto::new();
+                    args_pb.set_first(i.0.get_proto_representation());
+                    match &i.1 {
+                        Some(expr) => args_pb.set_second(expr.get_proto_representation()),
+                        None => (),
+                    }
+                    call_pb.set_args(args_pb);
+                }
+                constant_pb.set_call(call_pb);
+            },
+            Constant::Prefab(pop) => {
+                constant_pb.mut_prefab().set_pop(pop.get_proto_representation());
+            },
+            Constant::String(s) => {
+                constant_pb.set_string_constant(s.to_string());
+            },
+            Constant::Resource(s) => {
+                constant_pb.set_resource(s.to_string());
+            },
+            Constant::Int(i) => {
+                constant_pb.set_int(*i);
+            },
+            Constant::Float(i) => {
+                constant_pb.set_float(*i);
+            }
+        };
+        constant_pb
+    }
 }
 
 // Manual Hash and Eq impls using OrderedFloat, so that we get the desired
@@ -121,6 +227,19 @@ pub enum ConstFn {
     Filter,
     /// The `file()` annotator (marks a string as `isfile`).
     File,
+}
+
+impl ConstFn {
+        pub fn get_proto_representation(&self) -> ConstFnProto {
+        return match self {
+            ConstFn::Icon => ConstFnProto::CONST_FN_ICON,
+            ConstFn::Matrix => ConstFnProto::CONST_FN_MATRIX,
+            ConstFn::Newlist => ConstFnProto::CONST_FN_NEWLIST,
+            ConstFn::Sound => ConstFnProto::CONST_FN_SOUND,
+            ConstFn::Filter => ConstFnProto::CONST_FN_FILTER,
+            ConstFn::File => ConstFnProto::CONST_FN_FILE
+        };
+    }
 }
 
 /// A constant-evaluation error (usually type mismatch).
@@ -248,6 +367,8 @@ impl Constant {
             _ => return Err(EvalError),
         })
     }
+
+
 }
 
 impl Default for Constant {

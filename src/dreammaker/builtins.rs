@@ -592,7 +592,7 @@ pub fn register_builtins(tree: &mut ObjectTree) {
         datum/var/const/type;  // not editable
         datum/var/const/parent_type;  // not editable
         datum/var/tag;
-        datum/var/const/list/vars;  // not editable
+        //datum/var/const/list/vars;  // not editable
         datum/proc/New();
         datum/proc/Del();
         datum/proc/Read(/*savefile*/F);
@@ -603,7 +603,7 @@ pub fn register_builtins(tree: &mut ObjectTree) {
         list/var/const/type;
         list/var/const/parent_type;
         list/var/tag;
-        list/var/const/list/vars;
+        //list/var/const/list/vars;
         list/proc/Add(Item1, Item2/*,...*/);
         list/proc/Copy(Start=1, End=0);
         list/proc/Cut(Start=1, End=0);
@@ -727,7 +727,7 @@ pub fn register_builtins(tree: &mut ObjectTree) {
         mob/proc/Logout();
 
         world;
-        world/var/const/list/vars;
+        //world/var/const/list/vars;
         world/proc/New();
         world/proc/Del();
         world/proc/Topic(T, Addr, Master, Keys);
@@ -797,7 +797,7 @@ pub fn register_builtins(tree: &mut ObjectTree) {
         client/var/const/type;
         client/var/const/parent_type;
         client/var/tag;
-        client/var/const/list/vars;
+        //client/var/const/list/vars;
         client/proc/New();
         client/proc/Del();
         client/proc/Topic(href, href_list, hsrc);
@@ -1039,12 +1039,13 @@ pub fn register_builtins(tree: &mut ObjectTree) {
         // the reality of the DM compiler in this case rather than what the
         // documentation reports.
         mutable_appearance/parent_type = path!(/image);
+        mutable_appearance/var/opacity;  // inherited from /mob according to the docs
 
         savefile;
         savefile/var/const/type;
         savefile/var/const/parent_type;
         savefile/var/tag;
-        savefile/var/const/list/vars;
+        //savefile/var/const/list/vars;
         savefile/proc/New(filename, timeout);
         savefile/proc/Del();
         savefile/var/cd;

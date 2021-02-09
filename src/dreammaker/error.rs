@@ -7,11 +7,14 @@ use std::collections::HashMap;
 
 use termcolor::{ColorSpec, Color};
 
+use super::protos::ast::Location as LocationProto;
+use super::protos::ast::FileId as FileIdProto;
 use crate::config::Config;
+use std::convert::TryInto;
 
 /// An identifier referring to a loaded file.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct FileId(u16);
+pub struct FileId(pub u16);
 
 const FILEID_BUILTINS: FileId = FileId(0x0000);
 const FILEID_MIN: FileId = FileId(0x0001);
@@ -299,6 +302,18 @@ impl Location {
 
     pub fn is_builtins(self) -> bool {
         self.file == FILEID_BUILTINS
+    }
+
+pub fn get_proto_representation<'a>(&'a self) -> LocationProto {
+    let mut location = LocationProto::new();
+    let mut file_id = FileIdProto::new();
+    let FileId(file) = self.file;
+    file_id.set_file_id(file.try_into().unwrap());
+    location.set_file(file_id);
+    location.set_line(self.line.try_into().unwrap());
+    location.set_column(self.column.try_into().unwrap());
+
+    location
     }
 }
 

@@ -41,6 +41,7 @@ mod builtins;
 pub mod constants;
 pub mod dmi;
 pub mod config;
+pub mod protos;
 
 impl Context {
     /// Run the parsing suite on a given `.dme` file, producing an object tree.

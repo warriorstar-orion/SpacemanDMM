@@ -1,0 +1,13 @@
+[package]
+name = "dm2pb"
+version = "0.0.1"
+authors = ["Warriorstar Orion <orion@snowfrost.garden>"]
+edition = "2018"
+
+[[bin]]
+name = "dreammaker2pb"
+path = "dreammaker2pb.rs"
+
+[dependencies]
+dreammaker = { path = "../dreammaker" }
+protobuf = "2"

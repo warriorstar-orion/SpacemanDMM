@@ -2,6 +2,11 @@
 
 use std::fmt;
 
+use super::protos::ast::CommentKind as CommentKindProto;
+use super::protos::ast::DocTarget as DocTargetProto;
+use super::protos::ast::DocCollection as DocCollectionProto;
+use super::protos::ast::DocComment as DocCommentProto;
+
 /// A collection of documentation comments targeting the same item.
 #[derive(Default, Clone, Debug, PartialEq)]
 pub struct DocCollection {
@@ -57,6 +62,16 @@ impl DocCollection {
         }
         output
     }
+
+    pub fn get_proto_representation(&self) -> DocCollectionProto {
+        let mut doc_collection_pb = DocCollectionProto::new();
+        for elem in &self.elems {
+            doc_collection_pb.mut_elems().push(
+                elem.get_proto_representation(),
+            );
+        }
+        doc_collection_pb
+    }
 }
 
 /// A documentation comment.
@@ -80,6 +95,14 @@ impl DocComment {
     /// Check if this comment is entirely textless.
     fn is_empty(&self) -> bool {
         is_empty(&self.text, self.kind.ignore_char())
+    }
+
+    fn get_proto_representation(&self) -> DocCommentProto {
+        let mut doc_comment_pb = DocCommentProto::new();
+        doc_comment_pb.set_kind(self.kind.get_proto_representation());
+        doc_comment_pb.set_target(self.target.get_proto_representation());
+        doc_comment_pb.set_text(self.text.to_string());
+        doc_comment_pb
     }
 }
 
@@ -108,6 +131,13 @@ impl CommentKind {
         match self {
             CommentKind::Block => '*',
             CommentKind::Line => '/',
+        }
+    }
+
+    fn get_proto_representation(self) -> CommentKindProto {
+        match self {
+            CommentKind::Block => CommentKindProto::COMMENT_KIND_BLOCK,
+            CommentKind::Line => CommentKindProto::COMMENT_KIND_LINE,
         }
     }
 }
@@ -216,5 +246,14 @@ pub enum BuiltinDocs {
 impl Default for BuiltinDocs {
     fn default() -> Self {
         BuiltinDocs::None
+    }
+}
+
+impl DocTarget {
+    pub fn get_proto_representation(self) -> DocTargetProto {
+        match self {
+            DocTarget::FollowingItem => DocTargetProto::DOC_TARGET_FOLLOWING_ITEM,
+            DocTarget::EnclosingItem => DocTargetProto::DOC_TARGET_ENCLOSING_ITEM,
+        }
     }
 }
