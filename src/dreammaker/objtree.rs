@@ -198,8 +198,9 @@ impl Code {
             Code::Present(block) => {
                 code_pb.set_present(block_to_proto(&block));
             },
-            Code::Invalid(_err) => {
+            Code::Invalid(err) => {
                 code_pb.set_invalid(true);
+                code_pb.set_invalid_description(err.description().to_string());
             },
             Code::Builtin => {
                 code_pb.set_builtin(true);

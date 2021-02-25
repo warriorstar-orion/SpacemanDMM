@@ -158,6 +158,7 @@ message Code {
   optional bool invalid = 2;
   optional bool builtin = 3;
   optional bool disabled = 4;
+  optional string invalid_description = 5;
 }
 
 message VarTypeCollection { repeated VarType var_type = 1; }
