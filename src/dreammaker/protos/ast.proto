@@ -215,9 +215,15 @@ message VarStatement {
   optional Expression value = 3;
 }
 
-enum SettingMode { SETTING_MODE_ASSIGN = 0; SETTING_MODE_IN = 1; }
+enum SettingMode {
+  SETTING_MODE_ASSIGN = 0;
+  SETTING_MODE_IN = 1;
+}
 
-enum ProcDeclKind { PROC_DECL_KIND_PROC = 0; PROC_DECL_KIND_VERB = 1; }
+enum ProcDeclKind {
+  PROC_DECL_KIND_PROC = 0;
+  PROC_DECL_KIND_VERB = 1;
+}
 
 message Setting {
   optional string name = 1;
@@ -270,17 +276,15 @@ message Label {
 
 message Del { optional Expression expr = 1; }
 
-message Crash { optional Expression expr = 2; }
+message Crash { optional Expression expr = 1; }
 
-message StmtExpr {
-  optional Expression expr = 1;
-  optional bool is_set = 2;
-}
+message Return { optional Expression expr = 1; }
+message Throw { optional Expression expr = 1; }
 
 message Statement {
-  optional StmtExpr expr = 1;
-  optional StmtExpr return_s = 2;
-  optional StmtExpr throw = 3;
+  optional Expression expr = 1;
+  optional Return return_s = 2;
+  optional Throw throw = 3;
   optional While while_s = 4;
   optional DoWhile do_while = 5;
   optional If if_s = 6;
@@ -459,7 +463,9 @@ message SelfCall { repeated Expression expr = 1; }
 message ParentCall { repeated Expression expr = 1; }
 
 enum IndexKind {
-  INDEX_KIND_DOT = 0; INDEX_KIND_COLON = 1; INDEX_KIND_SAFE_DOT = 2;
+  INDEX_KIND_DOT = 0;
+  INDEX_KIND_COLON = 1;
+  INDEX_KIND_SAFE_DOT = 2;
   INDEX_KIND_SAFE_COLON = 3;
 }
 
@@ -514,11 +520,9 @@ message DynamicCall {
 
 message ListCall {
   repeated Expression call = 1;
-  optional bool is_set = 2;
 }
 
 message Term {
-  // Terms with no recursive contents
   optional bool null_t = 1;
   optional int32 int_t = 2;
   optional float float_t = 3;
@@ -526,13 +530,9 @@ message Term {
   optional string string_t = 5;
   optional string resource = 6;
   optional InputType as_t = 7;
-
-  // Non function calls with recursive contents
   optional Expression expr = 8;
   optional Prefab prefab = 9;
   optional InterpString interp_string = 10;
-
-  // Function calls with recursive contents
   optional TermCall call = 11;
   optional SelfCall self_call = 12;
   optional ParentCall parent_call = 13;

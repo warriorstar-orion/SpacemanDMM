@@ -897,7 +897,6 @@ impl Term {
                 term_pb.set_new(new_pb);
             },
             Term::List(exprs) => {
-                term_pb.mut_list().set_is_set(true);
                 for e in exprs {
                     term_pb.mut_list().mut_call().push(e.get_proto_representation());
                 }
@@ -1551,18 +1550,15 @@ impl Statement {
         let mut statement_pb = StatementProto::new();
         match self {
             Statement::Expr(expr) => {
-                statement_pb.mut_expr().set_is_set(true);
-                statement_pb.mut_expr().set_expr(expr.get_proto_representation());
+                statement_pb.set_expr(expr.get_proto_representation());
             },
             Statement::Return(expr) => {
-                statement_pb.mut_return_s().set_is_set(true);
                 match expr {
                     Some(e) => statement_pb.mut_return_s().set_expr(e.get_proto_representation()),
                     None => (),
                 }
             },
             Statement::Throw(expr) => {
-                statement_pb.mut_throw().set_is_set(true);
                 statement_pb.mut_throw().set_expr(expr.get_proto_representation());
             },
             Statement::While {condition, block} => {
