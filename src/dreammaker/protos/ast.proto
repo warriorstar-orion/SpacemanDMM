@@ -2,6 +2,9 @@ syntax = "proto2";
 
 package ast;
 
+option java_package = "spacemandmm.dreammaker.proto";
+option java_outer_classname = "Ast";
+
 message Pop {
   optional TreePath tree_path = 1;
   map<string, Constant> vars = 2;
