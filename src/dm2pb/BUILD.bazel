@@ -1,0 +1,13 @@
+load("@rules_rust//rust:rust.bzl", "rust_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_binary(
+    name = "dm2pb",
+    srcs = ["dreammaker2pb.rs"],
+    deps = [
+        "//src/dreammaker",
+        "//src/dreammaker/protos:ast_proto_rust",
+        "@rules_rust//proto/raze:protobuf",
+    ],
+)

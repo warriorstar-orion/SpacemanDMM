@@ -9,49 +9,49 @@ use linked_hash_map::LinkedHashMap;
 
 use crate::error::Location;
 
-use super::protos::ast::Block as BlockProto;
-use super::protos::ast::DoWhile as DoWhileProto;
-use super::protos::ast::ForLoop as ForLoopProto;
-use super::protos::ast::ForRange as ForRangeProto;
-use super::protos::ast::If as IfProto;
-use super::protos::ast::IfArm as IfArmProto;
-use super::protos::ast::Parameter as ParameterProto;
-use super::protos::ast::ProcDeclKind as ProcDeclKindProto;
-use super::protos::ast::SettingMode as SettingModeProto;
-use super::protos::ast::Statement as StatementProto;
-use super::protos::ast::SwitchCase as SwitchCaseProto;
-use super::protos::ast::SwitchCases as SwitchCasesProto;
-use super::protos::ast::TreePath as TreePathProto;
-use super::protos::ast::VarStatement as VarStatementProto;
-use super::protos::ast::VarType as VarTypeProto;
-use super::protos::ast::While as WhileProto;
-use super::protos::ast::AssignOp as AssignOpProto;
-use super::protos::ast::BinaryOp as BinaryOpProto;
-use super::protos::ast::PathOp as PathOpProto;
-use super::protos::ast::UnaryOp as UnaryOpProto;
-use super::protos::ast::AssignOpExpression as AssignOpExpressionProto;
-use super::protos::ast::BaseExpression as BaseExpressionProto;
-use super::protos::ast::BinaryOpExpression as BinaryOpExpressionProto;
-use super::protos::ast::EnumValue as EnumValueProtoEnum;
-use super::protos::ast::Expression as ExpressionProto;
-use super::protos::ast::Field as FieldProto;
-use super::protos::ast::Follow as FollowProto;
-use super::protos::ast::FollowCall as FollowCallProto;
-use super::protos::ast::IndexKind as IndexKindProto;
-use super::protos::ast::IndexOrField as IndexOrFieldProto;
-use super::protos::ast::InputType as InputTypeProto;
-use super::protos::ast::InterpString as InterpStringProto;
-use super::protos::ast::InterpStringCollection as InterpStringCollectionProto;
-use super::protos::ast::New as NewProto;
-use super::protos::ast::NewType as NewTypeProto;
-use super::protos::ast::ParentCall as ParentCallProto;
-use super::protos::ast::PickPair as PickPairProto;
-use super::protos::ast::Prefab as PrefabProto;
-use super::protos::ast::SelfCall as SelfCallProto;
-use super::protos::ast::Term as TermProto;
-use super::protos::ast::TermCall as TermCallProto;
-use super::protos::ast::TernaryOpExpression as TernaryOpExpressionProto;
-use super::protos::ast::TypePath as TypePathProto;
+use ast_proto_rust::ast::Block as BlockProto;
+use ast_proto_rust::ast::DoWhile as DoWhileProto;
+use ast_proto_rust::ast::ForLoop as ForLoopProto;
+use ast_proto_rust::ast::ForRange as ForRangeProto;
+use ast_proto_rust::ast::If as IfProto;
+use ast_proto_rust::ast::IfArm as IfArmProto;
+use ast_proto_rust::ast::Parameter as ParameterProto;
+use ast_proto_rust::ast::ProcDeclKind as ProcDeclKindProto;
+use ast_proto_rust::ast::SettingMode as SettingModeProto;
+use ast_proto_rust::ast::Statement as StatementProto;
+use ast_proto_rust::ast::SwitchCase as SwitchCaseProto;
+use ast_proto_rust::ast::SwitchCases as SwitchCasesProto;
+use ast_proto_rust::ast::TreePath as TreePathProto;
+use ast_proto_rust::ast::VarStatement as VarStatementProto;
+use ast_proto_rust::ast::VarType as VarTypeProto;
+use ast_proto_rust::ast::While as WhileProto;
+use ast_proto_rust::ast::AssignOp as AssignOpProto;
+use ast_proto_rust::ast::BinaryOp as BinaryOpProto;
+use ast_proto_rust::ast::PathOp as PathOpProto;
+use ast_proto_rust::ast::UnaryOp as UnaryOpProto;
+use ast_proto_rust::ast::AssignOpExpression as AssignOpExpressionProto;
+use ast_proto_rust::ast::BaseExpression as BaseExpressionProto;
+use ast_proto_rust::ast::BinaryOpExpression as BinaryOpExpressionProto;
+use ast_proto_rust::ast::InputTypeKey as InputTypeKeyProtoEnum;
+use ast_proto_rust::ast::Expression as ExpressionProto;
+use ast_proto_rust::ast::Field as FieldProto;
+use ast_proto_rust::ast::Follow as FollowProto;
+use ast_proto_rust::ast::FollowCall as FollowCallProto;
+use ast_proto_rust::ast::IndexKind as IndexKindProto;
+use ast_proto_rust::ast::IndexOrField as IndexOrFieldProto;
+use ast_proto_rust::ast::InputType as InputTypeProto;
+use ast_proto_rust::ast::InterpString as InterpStringProto;
+use ast_proto_rust::ast::InterpStringCollection as InterpStringCollectionProto;
+use ast_proto_rust::ast::New as NewProto;
+use ast_proto_rust::ast::NewType as NewTypeProto;
+use ast_proto_rust::ast::ParentCall as ParentCallProto;
+use ast_proto_rust::ast::PickPair as PickPairProto;
+use ast_proto_rust::ast::Prefab as PrefabProto;
+use ast_proto_rust::ast::SelfCall as SelfCallProto;
+use ast_proto_rust::ast::Term as TermProto;
+use ast_proto_rust::ast::TermCall as TermCallProto;
+use ast_proto_rust::ast::TernaryOpExpression as TernaryOpExpressionProto;
+use ast_proto_rust::ast::TypePath as TypePathProto;
 
 #[derive(Copy, Clone, Eq, Debug)]
 pub struct Spanned<T> {
@@ -1193,26 +1193,6 @@ macro_rules! type_table {
                 input_type_pb.set_val(0);
                 input_type_pb.set_display(format!("{}", self));
                 return input_type_pb;
-                //InputTypeProto::INPUT_TYPE_ERROR_UNKNOWN
-                // if self.contains(InputType::MOB) {
-                //     return InputTypeProto::INPUT_TYPE_MOB;
-                // }
-                // if self.contains(InputType::OBJ) { return InputTypeProto::INPUT_TYPE_OBJ; }
-                // if self.contains(InputType::TEXT) { return InputTypeProto::INPUT_TYPE_TEXT; }
-                // if self.contains(InputType::NUM) { return InputTypeProto::INPUT_TYPE_NUM; }
-                // if self.contains(InputType::FILE) { return InputTypeProto::INPUT_TYPE_FILE; }
-                // if self.contains(InputType::TURF) { return InputTypeProto::INPUT_TYPE_TURF; }
-                // if self.contains(InputType::KEY) { return InputTypeProto::INPUT_TYPE_KEY; }
-                // if self.contains(InputType::NULL) { return InputTypeProto::INPUT_TYPE_NULL; }
-                // if self.contains(InputType::AREA) { return InputTypeProto::INPUT_TYPE_AREA; }
-                // if self.contains(InputType::ICON) { return InputTypeProto::INPUT_TYPE_ICON; }
-                // if self.contains(InputType::SOUND) { return InputTypeProto::INPUT_TYPE_SOUND; }
-                // if self.contains(InputType::MESSAGE) { return InputTypeProto::INPUT_TYPE_MESSAGE; }
-                // if self.contains(InputType::ANYTHING) { return InputTypeProto::INPUT_TYPE_ANYTHING; }
-                // if self.contains(InputType::PASSWORD) { return InputTypeProto::INPUT_TYPE_PASSWORD; }
-                // if self.contains(InputType::COMMAND_TEXT) { return InputTypeProto::INPUT_TYPE_COMMAND_TEXT; }
-                // if self.contains(InputType::COLOR) { return InputTypeProto::INPUT_TYPE_COLOR; }
-                // return InputTypeProto::INPUT_TYPE_ERROR_UNKNOWN;
              }
         }
 
@@ -1241,22 +1221,22 @@ type_table! {
 
     // These values can be known with an invocation such as:
     //     src << as(command_text)
-    "mob",          MOB,          1 << 0,  EnumValueProtoEnum::INPUT_TYPE_MOB;
-    "obj",          OBJ,          1 << 1,  EnumValueProtoEnum::INPUT_TYPE_OBJ;
-    "text",         TEXT,         1 << 2,  EnumValueProtoEnum::INPUT_TYPE_TEXT;
-    "num",          NUM,          1 << 3,  EnumValueProtoEnum::INPUT_TYPE_NUM;
-    "file",         FILE,         1 << 4,  EnumValueProtoEnum::INPUT_TYPE_FILE;
-    "turf",         TURF,         1 << 5,  EnumValueProtoEnum::INPUT_TYPE_TURF;
-    "key",          KEY,          1 << 6,  EnumValueProtoEnum::INPUT_TYPE_KEY;
-    "null",         NULL,         1 << 7,  EnumValueProtoEnum::INPUT_TYPE_NULL;
-    "area",         AREA,         1 << 8,  EnumValueProtoEnum::INPUT_TYPE_AREA;
-    "icon",         ICON,         1 << 9,  EnumValueProtoEnum::INPUT_TYPE_ICON;
-    "sound",        SOUND,        1 << 10, EnumValueProtoEnum::INPUT_TYPE_SOUND;
-    "message",      MESSAGE,      1 << 11, EnumValueProtoEnum::INPUT_TYPE_MESSAGE;
-    "anything",     ANYTHING,     1 << 12, EnumValueProtoEnum::INPUT_TYPE_ANYTHING;
-    "password",     PASSWORD,     1 << 15, EnumValueProtoEnum::INPUT_TYPE_PASSWORD;
-    "command_text", COMMAND_TEXT, 1 << 16, EnumValueProtoEnum::INPUT_TYPE_COMMAND_TEXT;
-    "color",        COLOR,        1 << 17, EnumValueProtoEnum::INPUT_TYPE_COLOR;
+    "mob",          MOB,          1 << 0,  InputTypeKeyProtoEnum::INPUT_TYPE_MOB;
+    "obj",          OBJ,          1 << 1,  InputTypeKeyProtoEnum::INPUT_TYPE_OBJ;
+    "text",         TEXT,         1 << 2,  InputTypeKeyProtoEnum::INPUT_TYPE_TEXT;
+    "num",          NUM,          1 << 3,  InputTypeKeyProtoEnum::INPUT_TYPE_NUM;
+    "file",         FILE,         1 << 4,  InputTypeKeyProtoEnum::INPUT_TYPE_FILE;
+    "turf",         TURF,         1 << 5,  InputTypeKeyProtoEnum::INPUT_TYPE_TURF;
+    "key",          KEY,          1 << 6,  InputTypeKeyProtoEnum::INPUT_TYPE_KEY;
+    "null",         NULL,         1 << 7,  InputTypeKeyProtoEnum::INPUT_TYPE_NULL;
+    "area",         AREA,         1 << 8,  InputTypeKeyProtoEnum::INPUT_TYPE_AREA;
+    "icon",         ICON,         1 << 9,  InputTypeKeyProtoEnum::INPUT_TYPE_ICON;
+    "sound",        SOUND,        1 << 10, InputTypeKeyProtoEnum::INPUT_TYPE_SOUND;
+    "message",      MESSAGE,      1 << 11, InputTypeKeyProtoEnum::INPUT_TYPE_MESSAGE;
+    "anything",     ANYTHING,     1 << 12, InputTypeKeyProtoEnum::INPUT_TYPE_ANYTHING;
+    "password",     PASSWORD,     1 << 15, InputTypeKeyProtoEnum::INPUT_TYPE_PASSWORD;
+    "command_text", COMMAND_TEXT, 1 << 16, InputTypeKeyProtoEnum::INPUT_TYPE_COMMAND_TEXT;
+    "color",        COLOR,        1 << 17, InputTypeKeyProtoEnum::INPUT_TYPE_COLOR;
 }
 
 impl InputType {

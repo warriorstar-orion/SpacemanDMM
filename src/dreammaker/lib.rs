@@ -11,6 +11,7 @@ extern crate ordered_float;
 extern crate serde;
 extern crate serde_derive;
 extern crate toml;
+extern crate ast_proto_rust;
 
 use std::path::Path;
 use std::borrow::Cow;
@@ -41,7 +42,6 @@ mod builtins;
 pub mod constants;
 pub mod dmi;
 pub mod config;
-pub mod protos;
 
 impl Context {
     /// Run the parsing suite on a given `.dme` file, producing an object tree.

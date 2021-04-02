@@ -2,10 +2,10 @@
 
 use std::fmt;
 
-use super::protos::ast::CommentKind as CommentKindProto;
-use super::protos::ast::DocTarget as DocTargetProto;
-use super::protos::ast::DocCollection as DocCollectionProto;
-use super::protos::ast::DocComment as DocCommentProto;
+use ast_proto_rust::ast::CommentKind as CommentKindProto;
+use ast_proto_rust::ast::DocTarget as DocTargetProto;
+use ast_proto_rust::ast::DocCollection as DocCollectionProto;
+use ast_proto_rust::ast::DocComment as DocCommentProto;
 
 /// A collection of documentation comments targeting the same item.
 #[derive(Default, Clone, Debug, PartialEq)]

@@ -1,0 +1,102 @@
+"""
+@generated
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+
+# buildifier: disable=load
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# buildifier: disable=load
+load(
+    "@rules_rust//rust:rust.bzl",
+    "rust_binary",
+    "rust_library",
+    "rust_test",
+)
+
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//bazelbuild/cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
+
+licenses([
+    "notice",  # Apache-2.0 from expression "Apache-2.0"
+])
+
+# Generated Targets
+
+rust_library(
+    name = "glutin",
+    srcs = glob(["**/*.rs"]),
+    aliases = {
+    },
+    crate_features = [
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    data = [],
+    edition = "2018",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.21.2",
+    # buildifier: leave-alone
+    deps = [
+        "@raze__lazy_static__1_4_0//:lazy_static",
+        "@raze__winit__0_19_5//:winit",
+    ] + selects.with_or({
+        # cfg(any(target_os = "ios", target_os = "macos"))
+        (
+            "@rules_rust//rust/platform:x86_64-apple-darwin",
+        ): [
+            "@raze__glutin_gles2_sys__0_1_5//:glutin_gles2_sys",
+            "@raze__objc__0_2_7//:objc",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
+        # cfg(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "netbsd", target_os = "openbsd"))
+        (
+            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+        ): [
+            "@raze__glutin_egl_sys__0_1_5//:glutin_egl_sys",
+            "@raze__glutin_glx_sys__0_1_7//:glutin_glx_sys",
+            "@raze__libloading__0_5_2//:libloading",
+            "@raze__osmesa_sys__0_1_2//:osmesa_sys",
+            "@raze__parking_lot__0_9_0//:parking_lot",
+            "@raze__wayland_client__0_21_13//:wayland_client",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
+        # cfg(target_os = "macos")
+        (
+            "@rules_rust//rust/platform:x86_64-apple-darwin",
+        ): [
+            "@raze__cgl__0_2_3//:cgl",
+            "@raze__cocoa__0_18_5//:cocoa",
+            "@raze__core_foundation__0_6_4//:core_foundation",
+            "@raze__core_graphics__0_17_3//:core_graphics",
+        ],
+        "//conditions:default": [],
+    }) + selects.with_or({
+        # cfg(target_os = "windows")
+        (
+            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
+        ): [
+            "@raze__glutin_egl_sys__0_1_5//:glutin_egl_sys",
+            "@raze__glutin_wgl_sys__0_1_5//:glutin_wgl_sys",
+            "@raze__libloading__0_5_2//:libloading",
+            "@raze__parking_lot__0_9_0//:parking_lot",
+            "@raze__winapi__0_3_9//:winapi",
+        ],
+        "//conditions:default": [],
+    }),
+)

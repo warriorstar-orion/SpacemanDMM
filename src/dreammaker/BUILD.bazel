@@ -1,0 +1,32 @@
+load("@rules_rust//rust:rust.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "dreammaker",
+    srcs = glob(["*.rs"]),
+    edition = "2018",
+    crate_features = [
+        "default",
+        "macros",
+    ],
+    proc_macro_deps = [
+        "//src/builtins-proc-macro",
+        "@raze__phf_macros__0_8_0//:phf_macros",
+        "@raze__serde_derive__1_0_123//:serde_derive",
+    ],
+    deps = [
+        "//src/dreammaker/protos:ast_proto_rust",
+        "//src/interval-tree",
+        "@raze__bitflags__1_2_1//:bitflags",
+        "@raze__guard__0_5_0//:guard",
+        "@raze__linked_hash_map__0_5_2//:linked_hash_map",
+        "@raze__lodepng__3_4_3//:lodepng",
+        "@raze__ordered_float__2_1_1//:ordered_float",
+        "@raze__phf__0_8_0//:phf",
+        "@raze__protobuf__2_22_0//:protobuf",
+        "@raze__serde__1_0_123//:serde",
+        "@raze__termcolor__1_1_2//:termcolor",
+        "@raze__toml__0_5_8//:toml",
+    ],
+)

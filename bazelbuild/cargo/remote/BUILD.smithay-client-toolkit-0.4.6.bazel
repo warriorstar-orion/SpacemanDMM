@@ -1,0 +1,72 @@
+"""
+@generated
+cargo-raze crate build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+
+# buildifier: disable=load
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+# buildifier: disable=load
+load(
+    "@rules_rust//rust:rust.bzl",
+    "rust_binary",
+    "rust_library",
+    "rust_test",
+)
+
+package(default_visibility = [
+    # Public for visibility by "@raze__crate__version//" targets.
+    #
+    # Prefer access through "//bazelbuild/cargo", which limits external
+    # visibility to explicit Cargo.toml dependencies.
+    "//visibility:public",
+])
+
+licenses([
+    "notice",  # MIT from expression "MIT"
+])
+
+# Generated Targets
+
+# Unsupported target "compositor_info" with type "example" omitted
+
+# Unsupported target "image_viewer" with type "example" omitted
+
+# Unsupported target "kbd_input" with type "example" omitted
+
+# Unsupported target "pointer_input" with type "example" omitted
+
+# Unsupported target "selection" with type "example" omitted
+
+rust_library(
+    name = "smithay_client_toolkit",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+    ],
+    crate_root = "src/lib.rs",
+    crate_type = "lib",
+    data = [],
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-raze",
+        "manual",
+    ],
+    version = "0.4.6",
+    # buildifier: leave-alone
+    deps = [
+        "@raze__andrew__0_2_1//:andrew",
+        "@raze__bitflags__1_2_1//:bitflags",
+        "@raze__dlib__0_4_2//:dlib",
+        "@raze__lazy_static__1_4_0//:lazy_static",
+        "@raze__memmap__0_7_0//:memmap",
+        "@raze__nix__0_14_1//:nix",
+        "@raze__wayland_client__0_21_13//:wayland_client",
+        "@raze__wayland_commons__0_21_13//:wayland_commons",
+        "@raze__wayland_protocols__0_21_13//:wayland_protocols",
+    ],
+)

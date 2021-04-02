@@ -7,8 +7,8 @@ use std::collections::HashMap;
 
 use termcolor::{ColorSpec, Color};
 
-use super::protos::ast::Location as LocationProto;
-use super::protos::ast::FileId as FileIdProto;
+use ast_proto_rust::ast::Location as LocationProto;
+use ast_proto_rust::ast::FileId as FileIdProto;
 use crate::config::Config;
 use std::convert::TryInto;
 

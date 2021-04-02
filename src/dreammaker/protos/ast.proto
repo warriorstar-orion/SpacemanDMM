@@ -367,7 +367,7 @@ enum BinaryOp {
   BINARYOP_TO = 22;
 }
 
-enum EnumValue {
+enum InputTypeKey {
   INPUT_TYPE_MOB = 0;
   INPUT_TYPE_OBJ = 1;
   INPUT_TYPE_TEXT = 2;
@@ -390,7 +390,7 @@ enum EnumValue {
 message InputType {
   optional int32 val = 1;
   optional string display = 2;
-  repeated EnumValue key_name = 3;
+  repeated InputTypeKey key_name = 3;
 }
 
 message TypePath {
