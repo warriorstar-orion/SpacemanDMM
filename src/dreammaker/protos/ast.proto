@@ -244,19 +244,19 @@ message SwitchCaseRange {
   optional Expression end = 2;
 }
 
-message SwitchCase {
+message SwitchCaseElement {
   optional Expression exact = 1;
   optional SwitchCaseRange range = 2;
 }
 
-message SwitchCases {
-  repeated SwitchCase case = 1;
+message SwitchCase {
+  repeated SwitchCaseElement case_elements = 1;
   optional Block block = 2;
 }
 
-message Switch {
+message SwitchStatement {
   optional Expression input = 1;
-  repeated SwitchCases cases = 2;
+  repeated SwitchCase cases = 2;
   optional Block default = 3;
 }
 
@@ -279,7 +279,7 @@ message Label {
 
 message Del { optional Expression expr = 1; }
 
-message Crash { optional Expression expr = 1; }
+message Crash { optional Expression msg = 1; }
 
 message Return { optional Expression expr = 1; }
 message Throw { optional Expression expr = 1; }
@@ -298,7 +298,7 @@ message Statement {
   repeated VarStatement vars = 11;
   optional Setting setting = 12;
   optional Spawn spawn = 13;
-  optional Switch switch = 14;
+  optional SwitchStatement switch = 14;
   optional TryCatch try_catch = 15;
   optional Continue continue_s = 16;
   optional Break break_s = 17;

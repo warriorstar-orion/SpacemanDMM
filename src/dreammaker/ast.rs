@@ -20,7 +20,7 @@ use ast_proto_rust::ast::ProcDeclKind as ProcDeclKindProto;
 use ast_proto_rust::ast::SettingMode as SettingModeProto;
 use ast_proto_rust::ast::Statement as StatementProto;
 use ast_proto_rust::ast::SwitchCase as SwitchCaseProto;
-use ast_proto_rust::ast::SwitchCases as SwitchCasesProto;
+use ast_proto_rust::ast::SwitchCaseElement as SwitchCaseElementProto;
 use ast_proto_rust::ast::TreePath as TreePathProto;
 use ast_proto_rust::ast::VarStatement as VarStatementProto;
 use ast_proto_rust::ast::VarType as VarTypeProto;
@@ -1640,13 +1640,26 @@ impl Statement {
             },
             Statement::Switch {input, cases, default} => {
                 statement_pb.mut_switch().set_input(input.get_proto_representation());
-                for case in cases.iter() {
-                    let mut cases_pb = SwitchCasesProto::new();
-                    for s in &case.0.elem {
-                        cases_pb.mut_case().push(s.get_proto_representation());
+                for (case, ref block) in cases.iter() {
+                    let mut case_pb = SwitchCaseProto::new();
+                    for case_part in case.elem.iter() {
+                        match case_part {
+                            Case::Exact(expr) => {
+                                let mut case_element_pb = SwitchCaseElementProto::new();
+                                case_element_pb.set_exact(expr.get_proto_representation());
+                                case_pb.mut_case_elements().push(case_element_pb);
+                            },
+                            Case::Range(start, end) => {
+                                let mut range_element_pb = SwitchCaseElementProto::new();
+                                range_element_pb.mut_range().set_start(start.get_proto_representation());
+                                range_element_pb.mut_range().set_end(end.get_proto_representation());
+                                case_pb.mut_case_elements().push(range_element_pb);
+                            }
+                        }
                     }
-                    cases_pb.set_block(block_to_proto(&case.1));
-                    statement_pb.mut_switch().mut_cases().push(cases_pb);
+
+                    case_pb.set_block(block_to_proto(block));
+                    statement_pb.mut_switch().mut_cases().push(case_pb);
                 }
                 match default {
                     Some(expr) => statement_pb.mut_switch().set_default(block_to_proto(expr)),
@@ -1688,7 +1701,7 @@ impl Statement {
                 statement_pb.mut_del().set_expr(expr.get_proto_representation());
             },
             Statement::Crash(expr) => {
-                statement_pb.mut_crash().set_expr(expr.get_proto_representation());
+                statement_pb.mut_crash().set_msg(expr.get_proto_representation());
             }
         }
         statement_pb
@@ -1750,22 +1763,6 @@ impl fmt::Display for SettingMode {
 pub enum Case {
     Exact(Expression),
     Range(Expression, Expression),
-}
-
-impl Case {
-    pub fn get_proto_representation(&self) -> SwitchCaseProto {
-        let mut switch_case_pb = SwitchCaseProto::new();
-        match self {
-            Case::Exact(expr) => {
-                switch_case_pb.set_exact(expr.get_proto_representation());
-            },
-            Case::Range(start, end) => {
-                switch_case_pb.mut_range().set_start(start.get_proto_representation());
-                switch_case_pb.mut_range().set_end(end.get_proto_representation());
-            },
-        }
-        switch_case_pb
-    }
 }
 
 pub const KNOWN_SETTING_NAMES: &[&str] = &[
