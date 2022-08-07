@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -35,10 +36,7 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -46,16 +44,16 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=jobserver",
         "manual",
     ],
     version = "0.1.21",
     # buildifier: leave-alone
     deps = [
     ] + selects.with_or({
-        # cfg(unix)
         (
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
+            "@rules_rust//rust/platform:aarch64-apple-darwin",
         ): [
             "@raze__libc__0_2_86//:libc",
         ],

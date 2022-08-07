@@ -23,7 +23,7 @@ genmode = "Remote"
 render_package_aliases = false
 package_aliases_dir = "."
 targets = [
-    "x86_64-apple-darwin",
+    "aarch64-apple-darwin",
     "x86_64-pc-windows-msvc",
     "x86_64-unknown-linux-gnu",
 ]

@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -43,10 +44,7 @@ licenses([
 rust_library(
     name = "jsonrpc_core",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2018",
     proc_macro_deps = [
@@ -57,6 +55,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=jsonrpc-core",
         "manual",
     ],
     version = "14.2.0",

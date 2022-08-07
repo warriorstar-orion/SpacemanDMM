@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -37,8 +38,6 @@ rust_binary(
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_gen_hash_test",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/bin/gen_hash_test.rs",
     data = [],
     edition = "2018",
@@ -47,6 +46,7 @@ rust_binary(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=gen_hash_test",
         "manual",
     ],
     version = "0.8.0",
@@ -61,10 +61,7 @@ rust_binary(
 rust_library(
     name = "phf_generator",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -72,6 +69,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=phf_generator",
         "manual",
     ],
     version = "0.8.0",

@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -41,8 +42,6 @@ cargo_build_script(
     srcs = glob(["**/*.rs"]),
     build_script_env = {
     },
-    crate_features = [
-    ],
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2018",
@@ -58,7 +57,6 @@ cargo_build_script(
     deps = [
         "@raze__gl_generator__0_14_0//:gl_generator",
     ] + selects.with_or({
-        # cfg(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "netbsd", target_os = "openbsd"))
         (
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [
@@ -72,10 +70,7 @@ rust_library(
     srcs = glob(["**/*.rs"]),
     aliases = {
     },
-    crate_features = [
-    ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -83,6 +78,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=glutin_glx_sys",
         "manual",
     ],
     version = "0.1.7",
@@ -90,7 +86,6 @@ rust_library(
     deps = [
         ":glutin_glx_sys_build_script",
     ] + selects.with_or({
-        # cfg(any(target_os = "linux", target_os = "freebsd", target_os = "dragonfly", target_os = "netbsd", target_os = "openbsd"))
         (
             "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
         ): [

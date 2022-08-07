@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -33,15 +34,12 @@ licenses([
 rust_library(
     name = "rusttype",
     srcs = glob(["**/*.rs"]),
-    aliases = {
-    },
     crate_features = [
         "default",
         "has-atomics",
         "std",
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2018",
     rustc_flags = [
@@ -49,6 +47,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=rusttype",
         "manual",
     ],
     version = "0.8.3",
@@ -57,14 +56,5 @@ rust_library(
         "@raze__approx__0_3_2//:approx",
         "@raze__ordered_float__1_1_1//:ordered_float",
         "@raze__stb_truetype__0_3_1//:stb_truetype",
-    ] + selects.with_or({
-        # cfg(not(target_arch = "wasm32"))
-        (
-            "@rules_rust//rust/platform:x86_64-apple-darwin",
-            "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
-            "@rules_rust//rust/platform:x86_64-unknown-linux-gnu",
-        ): [
-        ],
-        "//conditions:default": [],
-    }),
+    ],
 )

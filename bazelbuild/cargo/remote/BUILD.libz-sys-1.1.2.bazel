@@ -10,9 +10,10 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 # buildifier: disable=load
 load(
-    "@rules_rust//rust:rust.bzl",
+    "@rules_rust//rust:defs.bzl",
     "rust_binary",
     "rust_library",
+    "rust_proc_macro",
     "rust_test",
 )
 
@@ -47,6 +48,7 @@ cargo_build_script(
     crate_root = "build.rs",
     data = glob(["**"]),
     edition = "2015",
+    links = "z",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -60,7 +62,6 @@ cargo_build_script(
         "@raze__cc__1_0_66//:cc",
         "@raze__pkg_config__0_3_19//:pkg_config",
     ] + selects.with_or({
-        # cfg(target_env = "msvc")
         (
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [
@@ -79,7 +80,6 @@ rust_library(
         "libc",
     ],
     crate_root = "src/lib.rs",
-    crate_type = "lib",
     data = [],
     edition = "2015",
     rustc_flags = [
@@ -87,6 +87,7 @@ rust_library(
     ],
     tags = [
         "cargo-raze",
+        "crate-name=libz-sys",
         "manual",
     ],
     version = "1.1.2",
@@ -95,7 +96,6 @@ rust_library(
         ":libz_sys_build_script",
         "@raze__libc__0_2_86//:libc",
     ] + selects.with_or({
-        # cfg(target_env = "msvc")
         (
             "@rules_rust//rust/platform:x86_64-pc-windows-msvc",
         ): [

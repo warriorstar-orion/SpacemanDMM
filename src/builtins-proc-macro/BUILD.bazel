@@ -1,4 +1,4 @@
-load("@rules_rust//rust:rust.bzl", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -11,5 +11,4 @@ rust_library(
         "@raze__quote__1_0_8//:quote",
         "@raze__syn__1_0_60//:syn",
     ],
-    crate_type = "proc-macro",
 )
