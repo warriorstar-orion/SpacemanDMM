@@ -11,12 +11,12 @@ rust_library(
         "macros",
     ],
     proc_macro_deps = [
-
+"//src/builtins-proc-macro",
         "@raze__phf_macros__0_8_0//:phf_macros",
         "@raze__serde_derive__1_0_123//:serde_derive",
     ],
     deps = [
-        "//src/builtins-proc-macro",
+
         "//src/dreammaker/protos:ast_proto_rust",
         "//src/interval-tree",
         "@raze__bitflags__1_2_1//:bitflags",
