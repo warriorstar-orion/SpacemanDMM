@@ -5,6 +5,53 @@ package ast;
 option java_package = "spacemandmm.dreammaker.proto";
 option java_outer_classname = "Ast";
 
+message Statement {
+    optional Expression expr = 1;
+    optional Return return_s = 2;
+    optional Throw throw = 3;
+    optional While while_s = 4;
+    optional DoWhile do_while = 5;
+    optional If if_s = 6;
+    optional ForLoop for_loop = 7;
+    optional ForList for_list = 8;
+    optional ForRange for_range = 9;
+    optional VarStatement var = 10;
+    repeated VarStatement vars = 11;
+    optional Setting setting = 12;
+    optional Spawn spawn = 13;
+    optional SwitchStatement switch = 14;
+    optional TryCatch try_catch = 15;
+    optional Continue continue_s = 16;
+    optional Break break_s = 17;
+    optional Goto goto = 18;
+    optional Label label = 19;
+    optional Del del = 20;
+    optional Crash crash = 21;
+  }
+
+  message Term {
+    optional bool null_t = 1;
+    optional int32 int_t = 2;
+    optional float float_t = 3;
+    optional string ident = 4;
+    optional string string_t = 5;
+    optional string resource = 6;
+    optional InputType as_t = 7;
+    optional Expression expr = 8;
+    optional Prefab prefab = 9;
+    optional InterpString interp_string = 10;
+    optional TermCall call = 11;
+    optional SelfCall self_call = 12;
+    optional ParentCall parent_call = 13;
+    optional New new = 14;
+    optional ListCall list = 15;
+    optional Input input = 16;
+    optional Locate locate = 17;
+    optional Pick pick = 18;
+    optional DynamicCall dynamic_call = 19;
+  }
+
+
 message Pop {
   optional TreePath tree_path = 1;
   map<string, Constant> vars = 2;
@@ -52,16 +99,6 @@ message Constant {
 
 message TreePath { repeated string s = 1; }
 
-message VarType {
-  optional bool is_static = 1;
-  optional bool is_const = 2;
-  optional bool is_tmp = 3;
-  optional bool is_final = 4;
-  optional bool is_private = 5;
-  optional bool is_protected = 6;
-  optional TreePath type_path = 7;
-}
-
 message SymbolId { optional int32 symbol_id = 1; }
 
 message Location {
@@ -71,6 +108,11 @@ message Location {
 }
 
 message FileId { optional int32 file_id = 1; }
+
+message TypeVar {
+    optional VarValue value = 1;
+    optional VarDeclaration declaration = 2;
+  }
 
 message VarValue {
   optional Location location = 1;
@@ -86,10 +128,15 @@ message VarDeclaration {
   optional SymbolId id = 3;
 }
 
-message TypeVar {
-  optional VarValue value = 1;
-  optional VarDeclaration declaration = 2;
-}
+message VarType {
+    optional bool is_static = 1;
+    optional bool is_const = 2;
+    optional bool is_tmp = 3;
+    optional bool is_final = 4;
+    optional bool is_private = 5;
+    optional bool is_protected = 6;
+    optional TreePath type_path = 7;
+  }
 
 message Type {
   optional string name = 1;
@@ -284,29 +331,7 @@ message Crash { optional Expression msg = 1; }
 message Return { optional Expression expr = 1; }
 message Throw { optional Expression expr = 1; }
 
-message Statement {
-  optional Expression expr = 1;
-  optional Return return_s = 2;
-  optional Throw throw = 3;
-  optional While while_s = 4;
-  optional DoWhile do_while = 5;
-  optional If if_s = 6;
-  optional ForLoop for_loop = 7;
-  optional ForList for_list = 8;
-  optional ForRange for_range = 9;
-  optional VarStatement var = 10;
-  repeated VarStatement vars = 11;
-  optional Setting setting = 12;
-  optional Spawn spawn = 13;
-  optional SwitchStatement switch = 14;
-  optional TryCatch try_catch = 15;
-  optional Continue continue_s = 16;
-  optional Break break_s = 17;
-  optional Goto goto = 18;
-  optional Label label = 19;
-  optional Del del = 20;
-  optional Crash crash = 21;
-}
+
 
 enum PathOp {
   PATHOP_SLASH = 0;
@@ -525,24 +550,35 @@ message ListCall {
   repeated Expression call = 1;
 }
 
-message Term {
-  optional bool null_t = 1;
-  optional int32 int_t = 2;
-  optional float float_t = 3;
-  optional string ident = 4;
-  optional string string_t = 5;
-  optional string resource = 6;
-  optional InputType as_t = 7;
-  optional Expression expr = 8;
-  optional Prefab prefab = 9;
-  optional InterpString interp_string = 10;
-  optional TermCall call = 11;
-  optional SelfCall self_call = 12;
-  optional ParentCall parent_call = 13;
-  optional New new = 14;
-  optional ListCall list = 15;
-  optional Input input = 16;
-  optional Locate locate = 17;
-  optional Pick pick = 18;
-  optional DynamicCall dynamic_call = 19;
+
+
+// PREPROCESSOR
+
+message Preprocessor {
+    optional DefineMap defines = 1;
+}
+
+message Define {
+    optional DefConstant constant = 1;
+    optional FuncConstant function = 2;
+}
+
+message DefConstant {
+    repeated string subst = 1;
+}
+
+message FuncConstant {}
+
+message DefineMapInner {
+    repeated string name = 2;
+    repeated DefineMapInnerPair inner_pairs = 1;
+}
+
+message DefineMapInnerPair {
+    optional Location location = 1;
+    optional Define define = 2;
+}
+
+message DefineMap {
+    optional DefineMapInner inner = 1;
 }

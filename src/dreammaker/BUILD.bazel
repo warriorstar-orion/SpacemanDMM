@@ -16,7 +16,6 @@ rust_library(
         "@raze__serde_derive__1_0_123//:serde_derive",
     ],
     deps = [
-
         "//src/dreammaker/protos:ast_proto_rust",
         "//src/interval-tree",
         "@raze__bitflags__1_2_1//:bitflags",

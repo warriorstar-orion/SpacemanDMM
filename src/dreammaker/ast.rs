@@ -9,49 +9,51 @@ use linked_hash_map::LinkedHashMap;
 
 use crate::error::Location;
 
-use ast_proto_rust::ast::Block as BlockProto;
-use ast_proto_rust::ast::DoWhile as DoWhileProto;
-use ast_proto_rust::ast::ForLoop as ForLoopProto;
-use ast_proto_rust::ast::ForRange as ForRangeProto;
-use ast_proto_rust::ast::If as IfProto;
-use ast_proto_rust::ast::IfArm as IfArmProto;
-use ast_proto_rust::ast::Parameter as ParameterProto;
-use ast_proto_rust::ast::ProcDeclKind as ProcDeclKindProto;
-use ast_proto_rust::ast::SettingMode as SettingModeProto;
-use ast_proto_rust::ast::Statement as StatementProto;
-use ast_proto_rust::ast::SwitchCase as SwitchCaseProto;
-use ast_proto_rust::ast::SwitchCaseElement as SwitchCaseElementProto;
-use ast_proto_rust::ast::TreePath as TreePathProto;
-use ast_proto_rust::ast::VarStatement as VarStatementProto;
-use ast_proto_rust::ast::VarType as VarTypeProto;
-use ast_proto_rust::ast::While as WhileProto;
 use ast_proto_rust::ast::AssignOp as AssignOpProto;
-use ast_proto_rust::ast::BinaryOp as BinaryOpProto;
-use ast_proto_rust::ast::PathOp as PathOpProto;
-use ast_proto_rust::ast::UnaryOp as UnaryOpProto;
 use ast_proto_rust::ast::AssignOpExpression as AssignOpExpressionProto;
 use ast_proto_rust::ast::BaseExpression as BaseExpressionProto;
+use ast_proto_rust::ast::BinaryOp as BinaryOpProto;
 use ast_proto_rust::ast::BinaryOpExpression as BinaryOpExpressionProto;
-use ast_proto_rust::ast::InputTypeKey as InputTypeKeyProtoEnum;
+use ast_proto_rust::ast::Block as BlockProto;
+use ast_proto_rust::ast::DoWhile as DoWhileProto;
 use ast_proto_rust::ast::Expression as ExpressionProto;
 use ast_proto_rust::ast::Field as FieldProto;
 use ast_proto_rust::ast::Follow as FollowProto;
 use ast_proto_rust::ast::FollowCall as FollowCallProto;
+use ast_proto_rust::ast::ForLoop as ForLoopProto;
+use ast_proto_rust::ast::ForRange as ForRangeProto;
+use ast_proto_rust::ast::If as IfProto;
+use ast_proto_rust::ast::IfArm as IfArmProto;
 use ast_proto_rust::ast::IndexKind as IndexKindProto;
+use ast_proto_rust::ast::ListCall as ListCallProto;
 use ast_proto_rust::ast::IndexOrField as IndexOrFieldProto;
 use ast_proto_rust::ast::InputType as InputTypeProto;
+use ast_proto_rust::ast::InputTypeKey as InputTypeKeyProtoEnum;
 use ast_proto_rust::ast::InterpString as InterpStringProto;
 use ast_proto_rust::ast::InterpStringCollection as InterpStringCollectionProto;
 use ast_proto_rust::ast::New as NewProto;
 use ast_proto_rust::ast::NewType as NewTypeProto;
+use ast_proto_rust::ast::Parameter as ParameterProto;
 use ast_proto_rust::ast::ParentCall as ParentCallProto;
+use ast_proto_rust::ast::PathOp as PathOpProto;
 use ast_proto_rust::ast::PickPair as PickPairProto;
 use ast_proto_rust::ast::Prefab as PrefabProto;
+use ast_proto_rust::ast::ProcDeclKind as ProcDeclKindProto;
+use ast_proto_rust::ast::Return as ReturnProto;
 use ast_proto_rust::ast::SelfCall as SelfCallProto;
+use ast_proto_rust::ast::SettingMode as SettingModeProto;
+use ast_proto_rust::ast::Statement as StatementProto;
+use ast_proto_rust::ast::SwitchCase as SwitchCaseProto;
+use ast_proto_rust::ast::SwitchCaseElement as SwitchCaseElementProto;
 use ast_proto_rust::ast::Term as TermProto;
 use ast_proto_rust::ast::TermCall as TermCallProto;
 use ast_proto_rust::ast::TernaryOpExpression as TernaryOpExpressionProto;
+use ast_proto_rust::ast::TreePath as TreePathProto;
 use ast_proto_rust::ast::TypePath as TypePathProto;
+use ast_proto_rust::ast::UnaryOp as UnaryOpProto;
+use ast_proto_rust::ast::VarStatement as VarStatementProto;
+use ast_proto_rust::ast::VarType as VarTypeProto;
+use ast_proto_rust::ast::While as WhileProto;
 
 #[derive(Copy, Clone, Eq, Debug)]
 pub struct Spanned<T> {
@@ -897,9 +899,11 @@ impl Term {
                 term_pb.set_new(new_pb);
             },
             Term::List(exprs) => {
+                let mut list_pb = ListCallProto::new();
                 for e in exprs {
-                    term_pb.mut_list().mut_call().push(e.get_proto_representation());
+                    list_pb.mut_call().push(e.get_proto_representation());
                 }
+                term_pb.set_list(list_pb);
             },
             Term::Input{args, input_type, in_list} => {
                 for e in args {
@@ -1535,7 +1539,7 @@ impl Statement {
             Statement::Return(expr) => {
                 match expr {
                     Some(e) => statement_pb.mut_return_s().set_expr(e.get_proto_representation()),
-                    None => (),
+                    None => statement_pb.set_return_s(ReturnProto::new()),
                 }
             },
             Statement::Throw(expr) => {

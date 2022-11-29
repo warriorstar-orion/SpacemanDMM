@@ -29,9 +29,10 @@ fn main() -> Result<(), Error> {
         .unwrap_or_else(|| dm::detect_environment_default()
             .expect("error detecting .dme")
             .expect("no .dme found"));
-    let pp = dm::preprocessor::Preprocessor::new(&context, dme)
+    let mut pp = dm::preprocessor::Preprocessor::new(&context, dme)
         .expect("i/o error opening .dme");
-    let indents = dm::indents::IndentProcessor::new(&context, pp);
+
+    let indents = dm::indents::IndentProcessor::new(&context, &mut pp);
     let mut parser = dm::parser::Parser::new(&context, indents);
     let mut graph_pb = GraphProto::new();
 
@@ -40,6 +41,12 @@ fn main() -> Result<(), Error> {
     ot.root().recurse(&mut |ty| {
         graph_pb.mut_field_type().push(ty.get_proto_representation());
     });
+
+    let pp_pb = pp.get_proto_representation();
+    let mut pp_buf = std::fs::File::create("pp.binarypb")
+        .expect("unable to create preprocessor file.");
+    pp_pb.write_to_writer(&mut pp_buf)
+        .expect("failed to write preprocessor binary proto to file.");
 
     let mut buf = std::fs::File::create(proto_output_path.unwrap_or("output.binarypb".to_string()))
         .expect("unable to create file.");

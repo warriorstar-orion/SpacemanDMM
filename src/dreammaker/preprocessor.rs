@@ -13,6 +13,11 @@ use super::docs::{DocComment, DocTarget, DocCollection};
 use super::annotation::*;
 use super::ast::Ident;
 
+use ast_proto_rust::ast::Preprocessor as PreprocessorProto;
+use ast_proto_rust::ast::DefineMap as DefineMapProto;
+use ast_proto_rust::ast::Define as DefineProto;
+use ast_proto_rust::ast::DefineMapInnerPair as DefineMapInnerPairProto;
+
 /// The maximum recursion depth of macro expansion.
 const MAX_RECURSION_DEPTH: usize = 32;
 
@@ -233,6 +238,33 @@ impl DefineMap {
             map.insert(name.clone(), (range.start, define.clone()));
         }
         map
+    }
+
+    fn get_proto_representation(&self) -> DefineMapProto {
+        let mut define_map_pb = DefineMapProto::new();
+        for (name, defines) in &self.inner {
+            define_map_pb.mut_inner().mut_name().push(name.to_string());
+            for (location, define) in defines {
+                let mut inner_pair = DefineMapInnerPairProto::new();
+                inner_pair.set_location(location.get_proto_representation());
+                let mut def_pb = DefineProto::new();
+                match define {
+                    Define::Constant {subst, ..}=> {
+                        for s in subst {
+                            def_pb.mut_constant().mut_subst().push(subst);
+                        }
+
+                    }
+                    Define::Function { params, subst, variadic, docs } => todo!(),
+                }
+                define_map_pb.mut_inner().mut_inner_pairs().push(inner_pair);
+            }
+        }
+        // for (name, vector) in self.defines.inner.drain() {
+        //     for (start, define) in vector {
+
+        // for (name, )
+        define_map_pb
     }
 
     /*
@@ -1177,6 +1209,12 @@ impl<'ctx> Preprocessor<'ctx> {
         }
         self.output.push_back(read);
         Ok(())
+    }
+
+    pub fn get_proto_representation(&self) -> PreprocessorProto {
+        let mut pp_pb = PreprocessorProto::new();
+        pp_pb.set_defines(self.defines.get_proto_representation());
+        pp_pb
     }
 }
 
