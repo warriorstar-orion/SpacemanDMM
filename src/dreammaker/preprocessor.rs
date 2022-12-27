@@ -251,11 +251,13 @@ impl DefineMap {
                 match define {
                     Define::Constant {subst, ..}=> {
                         for s in subst {
-                            def_pb.mut_constant().mut_subst().push(subst);
+                            def_pb.mut_constant().mut_subst().push(s.to_string());
                         }
-
+                        inner_pair.set_define(def_pb);
                     }
-                    Define::Function { params, subst, variadic, docs } => todo!(),
+                    Define::Function { params, subst, variadic, docs } => {
+
+                    },
                 }
                 define_map_pb.mut_inner().mut_inner_pairs().push(inner_pair);
             }
