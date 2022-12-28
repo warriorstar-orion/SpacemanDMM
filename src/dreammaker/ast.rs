@@ -15,6 +15,7 @@ use ast_proto_rust::ast::BaseExpression as BaseExpressionProto;
 use ast_proto_rust::ast::BinaryOp as BinaryOpProto;
 use ast_proto_rust::ast::BinaryOpExpression as BinaryOpExpressionProto;
 use ast_proto_rust::ast::Block as BlockProto;
+use ast_proto_rust::ast::Continue as ContinueProto;
 use ast_proto_rust::ast::DoWhile as DoWhileProto;
 use ast_proto_rust::ast::Expression as ExpressionProto;
 use ast_proto_rust::ast::Field as FieldProto;
@@ -1685,7 +1686,7 @@ impl Statement {
             Statement::Continue(s) => {
                 match s {
                     Some(expr) => statement_pb.mut_continue_s().set_s(expr.to_string()),
-                    None => (),
+                    None => statement_pb.set_continue_s(ContinueProto::new()),
                 };
             },
             Statement::Break(s) => {
