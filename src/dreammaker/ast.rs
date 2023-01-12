@@ -1692,7 +1692,7 @@ impl Statement {
             Statement::Break(s) => {
                 match s {
                     Some(expr) => statement_pb.mut_break_s().set_s(expr.to_string()),
-                    None => (),
+                    None => statement_pb.mut_break_s().set_s("".to_string()),
                 };
             },
               Statement::Goto(s) => {
