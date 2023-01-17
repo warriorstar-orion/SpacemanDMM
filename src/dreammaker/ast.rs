@@ -27,6 +27,7 @@ use ast_proto_rust::ast::If as IfProto;
 use ast_proto_rust::ast::IfArm as IfArmProto;
 use ast_proto_rust::ast::IndexKind as IndexKindProto;
 use ast_proto_rust::ast::ListCall as ListCallProto;
+use ast_proto_rust::ast::Locate as LocateProto;
 use ast_proto_rust::ast::IndexOrField as IndexOrFieldProto;
 use ast_proto_rust::ast::InputType as InputTypeProto;
 use ast_proto_rust::ast::InputTypeKey as InputTypeKeyProtoEnum;
@@ -920,13 +921,15 @@ impl Term {
                 }
             },
             Term::Locate{args, in_list} => {
+                let mut locate_pb = LocateProto::new();
                 for e in args {
-                    term_pb.mut_locate().mut_args().push(e.get_proto_representation());
+                    locate_pb.mut_args().push(e.get_proto_representation());
                 }
                 match in_list {
-                    Some(expr) => term_pb.mut_locate().set_in_list(expr.get_proto_representation()),
+                    Some(expr) => locate_pb.set_in_list(expr.get_proto_representation()),
                     None => (),
                 }
+                term_pb.set_locate(locate_pb);
             },
             Term::Pick(/*list of opt expr to expr tuples */l) => {
                 for tuple in l {
