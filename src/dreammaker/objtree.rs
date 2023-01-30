@@ -322,7 +322,8 @@ impl Type {
         result.set_location(self.location.get_proto_representation());
         result.set_location_specificity(self.location_specificity.clone().try_into().unwrap());
         for (key, type_var) in &self.vars {
-            result.mut_vars().insert(key.to_string(), type_var.get_proto_representation());
+            result.mut_vars().push(type_var.get_proto_representation());
+            result.mut_var_names().push(key.to_string());
         }
         for (key, proc) in &self.procs {
             result.mut_procs().push(proc.get_proto_representation());

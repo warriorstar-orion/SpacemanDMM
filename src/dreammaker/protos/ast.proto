@@ -144,7 +144,8 @@ message Type {
   optional string path = 2;
   optional Location location = 3;
   optional int64 location_specificity = 4;
-  map<string, TypeVar> vars = 5;
+  repeated TypeVar vars = 5;
+  repeated string var_names = 11;
   repeated TypeProc procs = 6;
   repeated string proc_names = 10;
   optional int64 parent_type = 7;
