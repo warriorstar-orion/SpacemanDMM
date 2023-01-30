@@ -215,6 +215,7 @@ impl Code {
 
 #[derive(Debug, Clone, Default)]
 pub struct TypeProc {
+    pub name: String,
     pub value: Vec<ProcValue>,
     pub declaration: Option<ProcDeclaration>,
 }
@@ -324,7 +325,8 @@ impl Type {
             result.mut_vars().insert(key.to_string(), type_var.get_proto_representation());
         }
         for (key, proc) in &self.procs {
-            result.mut_procs().insert(key.to_string(), proc.get_proto_representation());
+            result.mut_procs().push(proc.get_proto_representation());
+            result.mut_proc_names().push(key.to_string());
         }
         //result.set_parent_type(self.parent_type);
         result.set_docs(self.docs.get_proto_representation());

@@ -86,6 +86,7 @@ message ConstantCall {
 message ConstantPrefab { optional Pop pop = 1; }
 
 message Constant {
+  // TODO(wso): Rename this first one
   optional TreePath null = 1;
   optional ConstantNew new = 2;
   optional ConstantList list = 3;
@@ -144,7 +145,8 @@ message Type {
   optional Location location = 3;
   optional int64 location_specificity = 4;
   map<string, TypeVar> vars = 5;
-  map<string, TypeProc> procs = 6;
+  repeated TypeProc procs = 6;
+  repeated string proc_names = 10;
   optional int64 parent_type = 7;
   optional DocCollection docs = 8;
   optional SymbolId symbol_id = 9;
@@ -180,6 +182,7 @@ message ProcDeclaration {
 message TypeProc {
   repeated ProcValue value = 1;
   optional ProcDeclaration declaration = 2;
+//   optional string name = 3;
 }
 
 message DocCollection {
