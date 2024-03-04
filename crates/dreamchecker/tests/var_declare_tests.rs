@@ -64,3 +64,27 @@ fn var_undecl() {
     check_errors_match(code, VAR_UNDECL_ERRORS);
 }
 
+pub const VAR_TYPEPATH_ERRORS: &[(u32, u16, &str)] = &[
+    (6, 43, "/mob declares var \"invalid_type\" as typepath but sets it to \"not a type\""),
+    (11, 14, "/mob declares var \"foo_type\" as typepath /obj/foo but /mob/subtype assigns it a non-subtype /obj/bar"),
+    (12, 15, "/mob declares var \"foo_type2\" as typepath /obj/foo but /mob/subtype sets it to 3"),
+];
+
+#[test]
+fn var_typepath() {
+    let code = r##"
+/obj/foo
+
+/obj/bar
+
+/mob
+    var/SpacemanDMM_typepath/invalid_type = "not a type"
+    var/SpacemanDMM_typepath/foo_type = /obj/foo
+    var/SpacemanDMM_typepath/foo_type2 = /obj/foo
+
+/mob/subtype
+    foo_type = /obj/bar
+    foo_type2 = 3
+"##.trim();
+    check_errors_match(code, VAR_TYPEPATH_ERRORS);
+}

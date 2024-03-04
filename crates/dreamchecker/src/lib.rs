@@ -933,7 +933,7 @@ impl<'o> AnalyzeObjectTree<'o> {
 }
 
 fn static_type<'o>(objtree: &'o ObjectTree, location: Location, mut of: &[String]) -> Result<StaticType<'o>, DMError> {
-    while !of.is_empty() && ["static", "global", "const", "tmp", "final", "SpacemanDMM_final", "SpacemanDMM_private", "SpacemanDMM_protected"].contains(&&*of[0]) {
+    while !of.is_empty() && ["static", "global", "const", "tmp", "final", "SpacemanDMM_final", "SpacemanDMM_private", "SpacemanDMM_protected", "SpacemanDMM_typepath"].contains(&&*of[0]) {
         of = &of[1..];
     }
 
@@ -964,6 +964,24 @@ pub fn check_var_defs(objtree: &ObjectTree, context: &Context) {
     for typeref in objtree.iter_types() {
         let path = &typeref.path;
 
+        for (varname, typevar) in typeref.vars.iter() {
+            if let Some(mydecl) = &typevar.declaration {
+                if mydecl.var_type.flags.is_typepath() {
+                    if let Some(curvalue) = &typevar.value.constant {
+                        match curvalue {
+                            Constant::Null(_) => {},
+                            Constant::Prefab(_) => {},
+                            _ => {
+                                DMError::new(mydecl.location, format!("{} declares var \"{}\" as typepath but sets it to {}", path, varname, curvalue))
+                                    .with_errortype("typepath_var")
+                                    .register(context);
+                            },
+                        }
+                    }
+                }
+            }
+        }
+
         for parent in typeref.iter_parent_types() {
             if parent.is_root() {
                 break;
@@ -992,6 +1010,33 @@ pub fn check_var_defs(objtree: &ObjectTree, context: &Context) {
                     DMError::new(mydecl.location, format!("{} redeclares var {:?}", path, varname))
                         .with_note(decl.location, format!("declared on {} here", parent.path))
                         .register(context);
+                }
+
+                if decl.var_type.flags.is_typepath() {
+                    if let Some(curvalue) = &typevar.value.constant {
+                        if let Some(Constant::Prefab(ref parent_prefab)) = parentvar.value.constant {
+                            let typepath = dm::ast::FormatTreePath(&parent_prefab.path).to_string();
+                            let atom = objtree.expect(typepath.as_str());
+
+                            match curvalue {
+                                Constant::Null(_) => {},
+                                Constant::Prefab(pop) => {
+                                    if let Some(ty) = objtree.type_by_path(pop.path.iter()) {
+                                        if !ty.is_subtype_of(atom.get()) {
+                                            DMError::new(typevar.value.location, format!("{} declares var \"{}\" as typepath {} but {} assigns it a non-subtype {}", parent.path, varname, atom.path, path, curvalue))
+                                                .with_errortype("typepath_var")
+                                                .register(context);
+                                        }
+                                    }
+                                },
+                                _ => {
+                                    DMError::new(typevar.value.location, format!("{} declares var \"{}\" as typepath {} but {} sets it to {}", parent.path, varname, atom.path, path, curvalue))
+                                        .with_errortype("typepath_var")
+                                        .register(context);
+                                },
+                            }
+                        }
+                    }
                 }
 
                 if decl.var_type.flags.is_final() {

@@ -69,6 +69,7 @@ be enabled:
 	#define VAR_FINAL var/SpacemanDMM_final
 	#define VAR_PRIVATE var/SpacemanDMM_private
 	#define VAR_PROTECTED var/SpacemanDMM_protected
+    #define VAR_TYPEPATH var/SpacemanDMM_typepath
 #else
 	#define RETURN_TYPE(X)
 	#define SHOULD_CALL_PARENT(X)
@@ -82,6 +83,7 @@ be enabled:
 	#define VAR_FINAL var
 	#define VAR_PRIVATE var
 	#define VAR_PROTECTED var
+    #define VAR_TYPEPATH var
 #endif
 ```
 

@@ -727,7 +727,7 @@ impl<'o> WalkProc<'o> {
 
     #[allow(clippy::only_used_in_recursion)]
     fn static_type(&mut self, location: Location, mut of: &[String]) -> StaticType<'o> {
-        while !of.is_empty() && ["static", "global", "const", "tmp", "final", "SpacemanDMM_final", "SpacemanDMM_private", "SpacemanDMM_protected"].contains(&&*of[0]) {
+        while !of.is_empty() && ["static", "global", "const", "tmp", "final", "SpacemanDMM_final", "SpacemanDMM_private", "SpacemanDMM_protected", "SpacemanDMM_typepath"].contains(&&*of[0]) {
             of = &of[1..];
         }
 

@@ -562,6 +562,7 @@ bitflags! {
         const FINAL = 1 << 4;
         const PRIVATE = 1 << 5;
         const PROTECTED = 1 << 6;
+        const TYPEPATH = 1 << 7;
     }
 }
 
@@ -577,6 +578,7 @@ impl VarTypeFlags {
             "SpacemanDMM_final" => Some(VarTypeFlags::FINAL),
             "SpacemanDMM_private" => Some(VarTypeFlags::PRIVATE),
             "SpacemanDMM_protected" => Some(VarTypeFlags::PROTECTED),
+            "SpacemanDMM_typepath" => Some(VarTypeFlags::TYPEPATH),
             // Fallback
             _ => None,
         }
@@ -613,13 +615,18 @@ impl VarTypeFlags {
     }
 
     #[inline]
+    pub fn is_typepath(&self) -> bool {
+        self.contains(VarTypeFlags::TYPEPATH)
+    }
+
+    #[inline]
     pub fn is_const_evaluable(&self) -> bool {
         self.contains(VarTypeFlags::CONST) || !self.intersects(VarTypeFlags::STATIC | VarTypeFlags::PROTECTED)
     }
 
     #[inline]
     pub fn is_normal(&self) -> bool {
-        !self.intersects(VarTypeFlags::CONST | VarTypeFlags::STATIC | VarTypeFlags::PROTECTED)
+        !self.intersects(VarTypeFlags::CONST | VarTypeFlags::STATIC | VarTypeFlags::PROTECTED | VarTypeFlags::TYPEPATH)
     }
 
     pub fn to_vec(&self) -> Vec<&'static str> {
@@ -630,6 +637,7 @@ impl VarTypeFlags {
         if self.is_final() { v.push("final"); }
         if self.is_private() { v.push("SpacemanDMM_private"); }
         if self.is_protected() { v.push("SpacemanDMM_protected"); }
+        if self.is_typepath() { v.push("SpacemanDMM_typepath"); }
         v
     }
 }
@@ -653,6 +661,9 @@ impl fmt::Display for VarTypeFlags {
         }
         if self.is_protected() {
             fmt.write_str("SpacemanDMM_protected/")?;
+        }
+        if self.is_typepath() {
+            fmt.write_str("SpacemanDMM_typepath/")?;
         }
         Ok(())
     }
